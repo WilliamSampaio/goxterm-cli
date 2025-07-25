@@ -131,7 +131,7 @@ func open(cli *cli.Context) {
 				ssh.TTY_OP_OSPEED: 14400,
 			}
 
-			if err := session.RequestPty("xterm", 80, 40, modes); err != nil {
+			if err := session.RequestPty("xterm-256color", 80, 40, modes); err != nil {
 				log.Fatalf("Falha ao solicitar TTY: %v", err)
 			}
 
