@@ -16,8 +16,8 @@ OS=$(shell uname -s)
 
 all: build
 
-run:
-	go run $(MAIN_FILE)
+# run:
+# 	go run $(MAIN_FILE)
 
 build:
 	@echo "🔧 Buildando $(APP_NAME)..."
