@@ -1,14 +1,7 @@
 package main
 
-import (
-	"goxterm/app"
-	"log"
-	"os"
-)
+import "goxterm-cli/cmd"
 
 func main() {
-	application := app.Application()
-	if err := application.Run(os.Args); err != nil {
-		log.Fatal(err)
-	}
+	cmd.Execute()
 }

@@ -1,31 +1,26 @@
-# Nome do executável final
 APP_NAME=goxterm
-# Diretório de saída
-DIST_DIR=dist
-
-# Caminho do código-fonte principal
+DIST_DIR=build
 MAIN_FILE=main.go
-
-# Flags de compilação (pode ajustar conforme necessário)
 BUILD_FLAGS=
 
-# Detecta sistema operacional para build cross-platform se quiser
 OS=$(shell uname -s)
 
-.PHONY: all build run clean
+.PHONY: all build clean install
 
 all: build
 
-# run:
-# 	go run $(MAIN_FILE)
-
 build:
-	@echo "🔧 Buildando $(APP_NAME)..."
+	@echo "🔧 Building $(APP_NAME)..."
 	@mkdir -p $(DIST_DIR)
 	GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) go build $(BUILD_FLAGS) -o $(DIST_DIR)/$(APP_NAME) $(MAIN_FILE)
-	@echo "✅ Build completo: $(DIST_DIR)/$(APP_NAME)"
+	@echo "✅ Build complete: $(DIST_DIR)/$(APP_NAME)"
+
+install: build
+	@echo "📦 Installing $(APP_NAME) in /usr/local/bin..."
+	@sudo cp $(DIST_DIR)/$(APP_NAME) /usr/local/bin/$(APP_NAME)
+	@echo "✅ Installation complete. Now you can use the command '$(APP_NAME)' directly."
 
 clean:
-	@echo "🧹 Limpando arquivos de build..."
-	rm -rf $(DIST_DIR)
-	@echo "✅ Clean completo"
+	@echo "🧹 Cleaning up build files..."
+	@rm -rf $(DIST_DIR)
+	@echo "✅ Complete clean"
