@@ -17,8 +17,13 @@ build:
 
 install: build
 	@echo "📦 Installing $(APP_NAME) in /usr/local/bin..."
-	@sudo cp $(DIST_DIR)/$(APP_NAME) /usr/local/bin/$(APP_NAME)
+	@sudo install -Dm 0755 $(DIST_DIR)/$(APP_NAME) /usr/local/bin/$(APP_NAME)
 	@echo "✅ Installation complete. Now you can use the command '$(APP_NAME)' directly."
+
+uninstall:
+	@echo "🗑️ Uninstalling $(APP_NAME) from /usr/local/bin..."
+	@sudo rm -f /usr/local/bin/$(APP_NAME)
+	@echo "✅ Uninstallation complete."
 
 clean:
 	@echo "🧹 Cleaning up build files..."
