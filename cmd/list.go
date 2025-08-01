@@ -65,7 +65,7 @@ var listCmd = &cobra.Command{
 			Label:    "{{ . }}:",
 			Active:   "🟢 {{ .Name | cyan }}",
 			Inactive: "🟤 {{ .Name | cyan }}",
-			Selected: "- CREDENTIAL: {{ .Name | red | cyan }}",
+			Selected: "- CREDENTIAL: {{ .Name | cyan }}",
 			Details: `
 --------- SSH ----------
 {{ "Name:" | faint }} {{ .Name }}
