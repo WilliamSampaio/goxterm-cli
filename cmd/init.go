@@ -33,7 +33,7 @@ func Initialize() {
 	reader := bufio.NewReader(os.Stdin)
 
 	if config.Exists() && !overwrite {
-		fmt.Println("Configuration already exists. Use 'goxterm-cli setup --overwrite' to overwrite.")
+		fmt.Println("Configuration already exists. Use 'goxterm init --overwrite' to overwrite.")
 		return
 	}
 
