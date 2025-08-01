@@ -7,14 +7,12 @@ import (
 	"bufio"
 	"fmt"
 	"goxterm-cli/internal/config"
+	"goxterm-cli/internal/sshclient"
 	"goxterm-cli/internal/store"
 	"os"
-	"os/signal"
 	"strings"
 
-	"github.com/charmbracelet/x/term"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh"
 )
 
 // openCmd represents the open command
@@ -54,73 +52,7 @@ var openCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// Configurações do cliente SSH
-		config := &ssh.ClientConfig{
-			User: credential.User, // substitua pelo seu usuário
-			Auth: []ssh.AuthMethod{
-				ssh.Password(credential.Password), // ou use chave privada
-			},
-			HostKeyCallback: ssh.InsecureIgnoreHostKey(), // cuidado: desativa verificação da chave do host
-		}
-
-		// Conecta ao servidor SSH
-		client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", credential.Host, credential.Port), config)
-		if err != nil {
-			fmt.Printf("Falha ao conectar: %v", err)
-			os.Exit(1)
-		}
-		defer client.Close()
-
-		// Cria nova sessão SSH
-		session, err := client.NewSession()
-		if err != nil {
-			fmt.Printf("Falha ao criar sessão: %v", err)
-			os.Exit(1)
-		}
-		defer session.Close()
-
-		// Prepara o terminal local para modo raw (interativo)
-		oldState, err := term.MakeRaw(os.Stdin.Fd())
-		if err != nil {
-			fmt.Printf("Falha ao entrar em modo raw: %v", err)
-			os.Exit(1)
-		}
-		defer term.Restore(os.Stdin.Fd(), oldState)
-
-		// Captura Ctrl+C para restaurar terminal
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt)
-		go func() {
-			<-c
-			term.Restore(os.Stdin.Fd(), oldState)
-			os.Exit(0)
-		}()
-
-		// Redireciona IO (entrada/saída padrão)
-		session.Stdin = os.Stdin
-		session.Stdout = os.Stdout
-		session.Stderr = os.Stderr
-
-		// Solicita TTY (modo interativo)
-		modes := ssh.TerminalModes{
-			ssh.ECHO:          1,
-			ssh.TTY_OP_ISPEED: 14400,
-			ssh.TTY_OP_OSPEED: 14400,
-		}
-
-		if err := session.RequestPty("xterm-256color", 80, 40, modes); err != nil {
-			fmt.Printf("Falha ao solicitar TTY: %v", err)
-			os.Exit(1)
-		}
-
-		// Inicia shell interativo
-		if err := session.Shell(); err != nil {
-			fmt.Printf("Falha ao iniciar shell: %v", err)
-			os.Exit(1)
-		}
-
-		// Espera até a sessão terminar
-		session.Wait()
+		sshclient.ConnectAndRun(credential)
 	},
 }
 
