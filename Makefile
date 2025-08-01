@@ -5,7 +5,7 @@ BUILD_FLAGS=
 
 OS=$(shell uname -s)
 
-.PHONY: all build clean install
+.PHONY: all build install uninstall clean
 
 all: build
 
