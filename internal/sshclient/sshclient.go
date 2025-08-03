@@ -12,7 +12,7 @@ import (
 
 // ConnectAndRun initializes an SSH connection, starts an interactive shell, and manages the session lifecycle.
 func ConnectAndRun(credential store.SshCredential) error {
-	client, err := connectSSH(credential)
+	client, err := ConnectSSH(credential)
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func ConnectAndRun(credential store.SshCredential) error {
 		return err
 	}
 
-	if err := requestTTY(session); err != nil {
+	if err := RequestTTY(session); err != nil {
 		return err
 	}
 
@@ -48,7 +48,7 @@ func ConnectAndRun(credential store.SshCredential) error {
 }
 
 // connectSSH creates and returns an SSH client using the provided credentials.
-func connectSSH(cred store.SshCredential) (*ssh.Client, error) {
+func ConnectSSH(cred store.SshCredential) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		User: cred.User,
 		Auth: []ssh.AuthMethod{
@@ -95,7 +95,7 @@ func setupSessionIO(session *ssh.Session) error {
 }
 
 // requestTTY requests an interactive terminal for the SSH session.
-func requestTTY(session *ssh.Session) error {
+func RequestTTY(session *ssh.Session) error {
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          1,
 		ssh.TTY_OP_ISPEED: 14400,

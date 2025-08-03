@@ -10,6 +10,7 @@ import (
 
 var name string
 var password string
+var port int
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
