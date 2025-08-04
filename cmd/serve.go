@@ -35,7 +35,7 @@ func serve(port int) {
 
 	http.HandleFunc("/ws/ssh", websocket.SshWebSocketHandler)
 
-	http.Handle("/", http.FileServer(http.Dir("/usr/share/goxterm")))
+	http.Handle("/", http.FileServer(http.Dir("/usr/local/share/goxterm")))
 
 	log.Printf("Server started at http://localhost:%d\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
