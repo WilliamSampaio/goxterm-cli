@@ -15,11 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type SshCredentialWithName struct {
-	Name string
-	store.SshCredential
-}
-
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -42,23 +37,9 @@ var listCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if len(db.Credentials) == 0 {
+		if len(db.SshSessions) == 0 {
 			fmt.Println("No credentials found in the store.")
 			os.Exit(0)
-		}
-
-		var list []SshCredentialWithName
-
-		for key, value := range db.Credentials {
-			list = append(list, SshCredentialWithName{
-				Name: key,
-				SshCredential: store.SshCredential{
-					Host:     value.Host,
-					Port:     value.Port,
-					User:     value.User,
-					Password: value.Password,
-				},
-			})
 		}
 
 		templates := &promptui.SelectTemplates{
@@ -76,7 +57,7 @@ var listCmd = &cobra.Command{
 		}
 
 		searcher := func(input string, index int) bool {
-			credential := list[index]
+			credential := db.SshSessions[index]
 			name := strings.ReplaceAll(strings.ToLower(credential.Name), " ", "")
 			input = strings.ReplaceAll(strings.ToLower(input), " ", "")
 
@@ -85,7 +66,7 @@ var listCmd = &cobra.Command{
 
 		prompt := promptui.Select{
 			Label:     "Credentials",
-			Items:     list,
+			Items:     db.SshSessions,
 			Templates: templates,
 			Size:      4,
 			Searcher:  searcher,
@@ -98,12 +79,7 @@ var listCmd = &cobra.Command{
 			return
 		}
 
-		sshclient.ConnectAndRun(store.SshCredential{
-			Host:     list[i].Host,
-			Port:     list[i].Port,
-			User:     list[i].User,
-			Password: list[i].Password,
-		})
+		sshclient.ConnectAndRun(db.SshSessions[i])
 	},
 }
 

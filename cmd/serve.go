@@ -31,9 +31,9 @@ func init() {
 func serve(port int) {
 	fmt.Println("Starting GoXterm web server...")
 
-	http.HandleFunc("/api/credentials", api.GetListCredentials)
+	http.HandleFunc("/api/ssh/sessions", api.GetListCredentials)
 
-	http.HandleFunc("/ssh", websocket.SshWebSocketHandler)
+	http.HandleFunc("/ws/ssh", websocket.SshWebSocketHandler)
 
 	http.Handle("/", http.FileServer(http.Dir("/usr/share/goxterm")))
 

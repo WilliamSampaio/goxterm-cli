@@ -45,14 +45,14 @@ var openCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		credential, exists := db.Credentials[name]
-		if !exists {
-			fmt.Printf("Connection '%s' not found in the store.\n", name)
+		credential, err := db.GetSshSessionByName(name)
+		if err != nil {
+			fmt.Printf("Error not found: %v\n", err)
 			fmt.Println("Please run 'goxterm save' to add a new connection.")
 			os.Exit(1)
 		}
 
-		sshclient.ConnectAndRun(credential)
+		sshclient.ConnectAndRun(*credential)
 	},
 }
 

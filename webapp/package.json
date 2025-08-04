@@ -11,9 +11,12 @@
   "dependencies": {
     "@fontsource/roboto": "5.2.6",
     "@mdi/font": "7.4.47",
+    "@xterm/xterm": "^5.5.0",
     "axios": "^1.11.0",
     "vue": "^3.5.17",
-    "vuetify": "^3.9.1"
+    "vuetify": "^3.9.1",
+    "xterm-addon-fit": "^0.8.0",
+    "xterm-addon-web-links": "^0.9.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",

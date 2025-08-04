@@ -36,14 +36,8 @@ func GetListCredentials(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var list []string
-
-	for k := range db.Credentials {
-		list = append(list, k)
-	}
-
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(list); err != nil {
+	if err := json.NewEncoder(w).Encode(db.SshSessions); err != nil {
 		http.Error(w, "Error encoding response", http.StatusInternalServerError)
 		return
 	}

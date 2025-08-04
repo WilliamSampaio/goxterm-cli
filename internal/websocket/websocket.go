@@ -5,8 +5,10 @@ import (
 	"goxterm-cli/internal/config"
 	"goxterm-cli/internal/sshclient"
 	"goxterm-cli/internal/store"
+	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 )
@@ -19,15 +21,22 @@ var upgrader = websocket.Upgrader{
 
 func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
-	name := r.URL.Query().Get("name")
-	log.Println("WebSocket connection request for:", name)
+	strId := r.URL.Query().Get("id")
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	id, err := strconv.Atoi(strId)
+	if err != nil {
+		log.Println("Error converting string to int:", err)
+		return
+	}
+
+	log.Println("WebSocket connection request for:", id)
+
+	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("WebSocket upgrade error:", err)
 		return
 	}
-	defer conn.Close()
+	defer ws.Close()
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -49,14 +58,14 @@ func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	credential, exists := db.Credentials[name]
-	if !exists {
-		log.Printf("Connection '%s' not found in the store.\n", name)
-		http.Error(w, fmt.Sprintf("Connection '%s' not found in the store", name), http.StatusNotFound)
+	credential, err := db.GetSshSession(id)
+	if err != nil {
+		log.Printf("Connection '%d' not found in the store.\n", id)
+		http.Error(w, fmt.Sprintf("Connection '%d' not found in the store", id), http.StatusNotFound)
 		return
 	}
 
-	client, err := sshclient.ConnectSSH(credential)
+	client, err := sshclient.ConnectSSH(*credential)
 	if err != nil {
 		log.Println("SSH dial error:", err)
 		http.Error(w, "SSH connection error", http.StatusInternalServerError)
@@ -64,46 +73,49 @@ func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer client.Close()
 
-	sess, err := client.NewSession()
+	session, err := client.NewSession()
 	if err != nil {
 		log.Println("SSH session error:", err)
 		http.Error(w, "Failed to create SSH session", http.StatusInternalServerError)
 		return
 	}
-	defer sess.Close()
+	defer session.Close()
 
-	stdin, _ := sess.StdinPipe()
-	stdout, _ := sess.StdoutPipe()
-	sess.Stderr = sess.Stdout
-
-	if err := sshclient.RequestTTY(sess); err != nil {
-		log.Println("SSH session error:", err)
+	if err := sshclient.RequestTTY(session); err != nil {
+		log.Println("Error request PTY:", err)
 		return
 	}
 
-	if err := sess.Shell(); err != nil {
-		log.Println("failed to start shell:", err)
+	stdinPipe, _ := session.StdinPipe()
+	stdoutPipe, _ := session.StdoutPipe()
+	stderrPipe, _ := session.StderrPipe()
+
+	if err := session.Shell(); err != nil {
+		log.Println("Failed to start shell:", err)
 		return
 	}
 
-	// Leitor do SSH para WebSocket
 	go func() {
-		buf := make([]byte, 1024)
-		for {
-			n, err := stdout.Read(buf)
-			if err != nil {
-				break
-			}
-			conn.WriteMessage(websocket.TextMessage, buf[:n])
-		}
+		io.Copy(&wsWriter{ws}, stdoutPipe)
+	}()
+	go func() {
+		io.Copy(&wsWriter{ws}, stderrPipe)
 	}()
 
-	// Escritor do WebSocket para SSH
 	for {
-		_, msg, err := conn.ReadMessage()
+		_, msg, err := ws.ReadMessage()
 		if err != nil {
 			break
 		}
-		stdin.Write(msg)
+		stdinPipe.Write(msg)
 	}
+}
+
+type wsWriter struct {
+	ws *websocket.Conn
+}
+
+func (w *wsWriter) Write(p []byte) (int, error) {
+	err := w.ws.WriteMessage(websocket.TextMessage, p)
+	return len(p), err
 }

@@ -11,7 +11,7 @@ import (
 )
 
 // ConnectAndRun initializes an SSH connection, starts an interactive shell, and manages the session lifecycle.
-func ConnectAndRun(credential store.SshCredential) error {
+func ConnectAndRun(credential store.SshSession) error {
 	client, err := ConnectSSH(credential)
 	if err != nil {
 		return err
@@ -48,16 +48,16 @@ func ConnectAndRun(credential store.SshCredential) error {
 }
 
 // connectSSH creates and returns an SSH client using the provided credentials.
-func ConnectSSH(cred store.SshCredential) (*ssh.Client, error) {
+func ConnectSSH(credential store.SshSession) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
-		User: cred.User,
+		User: credential.User,
 		Auth: []ssh.AuthMethod{
-			ssh.Password(cred.Password),
+			ssh.Password(credential.Password),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", cred.Host, cred.Port), config)
+	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", credential.Host, credential.Port), config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect: %v", err)
 	}
@@ -102,7 +102,15 @@ func RequestTTY(session *ssh.Session) error {
 		ssh.TTY_OP_OSPEED: 14400,
 	}
 
-	if err := session.RequestPty("xterm-256color", 80, 40, modes); err != nil {
+	fd := uintptr(os.Stdin.Fd())
+	width, height, err := term.GetSize(fd)
+	if err != nil {
+		// fallback for 80x24
+		width = 80
+		height = 24
+	}
+
+	if err := session.RequestPty("xterm-256color", height, width, modes); err != nil {
 		return fmt.Errorf("failed to request TTY: %v", err)
 	}
 	return nil

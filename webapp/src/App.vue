@@ -1,30 +1,40 @@
 <template>
-  <v-app>
+  <v-app id="inspire">
+    <v-toolbar color="primary">
+      <v-navigation-drawer v-model="drawer">
+        <v-list lines="one">
+          <v-list-subheader>SESSIONS:</v-list-subheader>
+          <v-divider></v-divider>
+          <v-list-item v-for="item in data.sessions" :key="item.id" @click="connect(item)">
+            <v-list-item-title>{{ item.name }}</v-list-item-title>
+            <v-list-item-subtitle>{{ item.host }}:{{ item.port }}</v-list-item-subtitle>
+            <template v-slot:append>
+              <v-icon icon="mdi mdi-open-in-new"></v-icon>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-navigation-drawer>
+
+      <v-app-bar>
+        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-app-bar-title>GoXterm</v-app-bar-title>
+        <v-btn icon="mdi-magnify"></v-btn>
+        <template v-slot:extension>
+          <v-tabs v-model="data.tab" align-tabs="title">
+            <v-tab v-for="t in data.tabs" :key="t.id" :text="t.name" :value="t"></v-tab>
+          </v-tabs>
+        </template>
+      </v-app-bar>
+    </v-toolbar>
+
     <v-main>
-      <v-container>
-        <v-select v-model="data.selectedName" label="Select" :items="data.credentials" clearable></v-select>
-
-        <v-btn class="mb-3" @click="open">
-          Connect
-        </v-btn>
-
-        <v-tabs v-model="data.tabModel">
-          <v-tab v-for="tab in data.tabs" :key="tab.id">
-            {{ tab.title }}
-          </v-tab>
-        </v-tabs>
-
-        <v-tabs-window v-model="data.tabModel">
-          <v-tabs-window-item v-for="tab in data.tabs" :key="tab.id">
-            <!-- Content for {{ tab.title }} -->
-            <v-card flat>
-              <v-card-text>
-                <Terminal :name="tab.title" />
-              </v-card-text>
-            </v-card>
+      <v-card>
+        <v-tabs-window v-model="data.tab">
+          <v-tabs-window-item v-for="t in data.tabs" :key="t.id" :value="t">
+            <Terminal :id="t.sessionId" />
           </v-tabs-window-item>
         </v-tabs-window>
-      </v-container>
+      </v-card>
     </v-main>
   </v-app>
 </template>
@@ -33,6 +43,9 @@
 import axios from 'axios'
 import { onMounted, reactive, ref, watch } from 'vue'
 import Terminal from './components/Terminal.vue';
+import { BACKEND_HOST } from './utils';
+
+const drawer = ref(null);
 
 const length = ref(15)
 const tab = ref(null)
@@ -42,34 +55,28 @@ watch(length, val => {
 })
 
 const data = reactive({
-  credentials: [],
+  drawer: null,
+  sessions: [],
   tabs: [],
-  tabModel: null,
-  selectedName: null
+  tab: null,
 });
 
 onMounted(() => {
-  axios.get('http://localhost:8080/api/credentials')
+  axios.get(`http://${BACKEND_HOST}/api/ssh/sessions`)
     .then(response => {
-      console.log('Data fetched:', response.data);
-      data.credentials = response.data || [];
+      data.sessions = response.data || [];
     })
     .catch(error => {
       console.error('Error fetching data:', error);
     });
 });
 
-const open = () => {
+const connect = (item) => {
   const newTabId = data.tabs.length + 1;
   data.tabs.push({
     id: newTabId,
-    title: data.selectedName
+    sessionId: item.id,
+    name: item.name
   });
-
-  this.$nextTick(() => {
-    data.tabModel = newTabId;
-  });
-
-  data.selectedName = null;
 }
 </script>

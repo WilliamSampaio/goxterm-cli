@@ -78,14 +78,17 @@ var saveCmd = &cobra.Command{
 
 		host = split2[0]
 
-		credential := store.SshCredential{
+		credential := store.SshSession{
+			Session: store.Session{
+				Name: name,
+			},
 			Host:     host,
 			Port:     port,
 			User:     user,
 			Password: password,
 		}
 
-		db.Credentials[name] = credential
+		db.AddSshSession(credential)
 
 		if err := store.Save(cfg.StorePath, &db); err != nil {
 			fmt.Printf("Error saving store: %v\n", err)
