@@ -1,13 +1,7 @@
 <template>
   <v-app id="inspire">
     <v-navigation-drawer permanent>
-      <v-list-item v-for="item in data.sessions" :key="item.id" @click="connect(item)">
-        <v-list-item-title>{{ item.name }}</v-list-item-title>
-        <v-list-item-subtitle>{{ item.host }}:{{ item.port }}</v-list-item-subtitle>
-        <template v-slot:append>
-          <v-icon icon="mdi mdi-open-in-new"></v-icon>
-        </template>
-      </v-list-item>
+      <DrawerListItem v-for="item in data.sessions" :session="item" @selected="connect(item)" />
       <template v-slot:prepend>
         <div class="pa-2">
           <v-btn color="primary" variant="tonal" block>
@@ -54,8 +48,9 @@
 <script setup>
 import axios from 'axios'
 import { onMounted, reactive, ref, watch } from 'vue'
-import Terminal from './components/Terminal.vue';
 import { BACKEND_HOST } from './utils';
+import Terminal from './components/Terminal.vue';
+import DrawerListItem from './components/DrawerListItem.vue';
 
 const length = ref(15)
 const tab = ref(null)
