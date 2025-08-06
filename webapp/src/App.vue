@@ -35,13 +35,18 @@
         </v-tabs>
         <v-tabs-window v-model="data.tab">
           <v-tabs-window-item v-for="t in data.tabs" :key="t.id" :value="t">
+            <v-sheet class="pa-2 text-center">
+              <v-btn variant="tonal" color="error" @click="" @dblclick="closeTab()" icon>
+                <v-icon icon="mdi-close"></v-icon>
+                <v-tooltip activator="parent" location="bottom">Double Click</v-tooltip>
+              </v-btn>
+            </v-sheet>
             <Terminal :id="t.sessionId" />
           </v-tabs-window-item>
         </v-tabs-window>
       </v-card>
       <v-empty-state v-else headline="Whoops, 404" title="Page not found"
-        text="The page you were looking for does not exist"
-        image="https://vuetifyjs.b-cdn.net/docs/images/logos/v.png"></v-empty-state>
+        text="The page you were looking for does not exist" icon="mdi mdi-console"></v-empty-state>
     </v-main>
   </v-app>
 </template>
@@ -69,7 +74,6 @@ const data = reactive({
 onMounted(() => {
   axios.get(`http://${BACKEND_HOST}/api/ssh/sessions`)
     .then(response => {
-      console.info(response.headers);
       if (response.headers['content-type'] === "application/json") {
         data.sessions = response.data || [];
       }
@@ -86,5 +90,17 @@ const connect = (item) => {
     sessionId: item.id,
     name: item.name
   });
+}
+
+const closeTab = () => {
+  const index = data.tabs.indexOf(data.tab);
+  if (data.tabs[index] !== undefined) {
+    data.tabs.splice(index, 1);
+    if (index > data.tabs.length - 1) {
+      data.tab = data.tabs[data.tabs.length - 1];
+    } else {
+      data.tab = data.tabs[index];
+    }
+  };
 }
 </script>
