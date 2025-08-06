@@ -34,7 +34,7 @@ onMounted(() => {
 
     fitAddon.fit();
 
-    term.write('WELCOME TO GOXTERM! https://github.com/WilliamSampaio/goxterm-cli\r\n');
+    term.write('<< WELCOME TO GOXTERM! >>\r\n');
 
     const ws = new WebSocket(`ws://${BACKEND_HOST}/ws/ssh?id=${props.id}`);
     ws.onmessage = (e) => term.write(e.data);
