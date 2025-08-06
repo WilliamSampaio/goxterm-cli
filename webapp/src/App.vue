@@ -1,5 +1,5 @@
 <template>
-  <v-app id="inspire">
+  <v-app>
     <v-navigation-drawer permanent>
       <DrawerListItem v-for="item in data.sessions" :session="item" @selected="connect(item)" />
       <template v-slot:prepend>
@@ -25,10 +25,10 @@
     <v-main>
       <v-card v-if="data.tabs.length > 0">
         <v-tabs v-model="data.tab">
-          <v-tab v-for="t in data.tabs" :key="t.id" :text="t.name" :value="t"></v-tab>
+          <v-tab v-for="(t, i) in data.tabs" :text="t.name" :key="i" :value="t"></v-tab>
         </v-tabs>
         <v-tabs-window v-model="data.tab">
-          <v-tabs-window-item v-for="t in data.tabs" :key="t.id" :value="t">
+          <v-tabs-window-item v-for="(t, i) in data.tabs" :key="i" :value="t">
             <v-sheet class="pa-2 text-center">
               <v-btn variant="tonal" color="error" @click="" @dblclick="closeTab()" icon>
                 <v-icon icon="mdi-close"></v-icon>
@@ -79,12 +79,12 @@ onMounted(() => {
 });
 
 const connect = (item) => {
-  const newTabId = data.tabs.length + 1;
-  data.tabs.push({
-    id: newTabId,
+  const len = data.tabs.push({
+    id: data.tabs.length + 1,
     sessionId: item.id,
     name: item.name
   });
+  data.tab = data.tabs[len - 1];
 }
 
 const closeTab = () => {

@@ -1,7 +1,7 @@
 <template>
   <v-menu location="end">
     <template v-slot:activator="{ props: menu }">
-      <v-list-item :key="session.id" v-bind="mergeProps(menu, tooltip)">
+      <v-list-item :key="session.id" v-bind="menu">
         <v-list-item-title>{{ session.name }}</v-list-item-title>
         <v-list-item-subtitle>{{ session.host }}:{{ session.port }}</v-list-item-subtitle>
         <template v-slot:append>
@@ -19,8 +19,6 @@
 </template>
 
 <script setup>
-import { mergeProps } from 'vue'
-
 const props = defineProps({
   session: {
     required: true
