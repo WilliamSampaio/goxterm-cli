@@ -47,17 +47,10 @@
 
 <script setup>
 import axios from 'axios'
-import { onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, reactive } from 'vue'
 import { BACKEND_HOST } from './utils';
 import Terminal from './components/Terminal.vue';
 import DrawerListItem from './components/DrawerListItem.vue';
-
-const length = ref(15)
-const tab = ref(null)
-
-watch(length, val => {
-  tab.value = val - 1
-})
 
 const data = reactive({
   drawer: null,
