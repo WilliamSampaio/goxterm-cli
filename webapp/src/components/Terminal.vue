@@ -1,11 +1,12 @@
 <template>
-  <div id="terminal" ref="terminal"></div>
+  <div class="pa-2 bg-black" ref="terminal"></div>
 </template>
 
 <script setup>
 import { BACKEND_HOST } from '@/utils';
 import { Terminal } from '@xterm/xterm';
 import { onMounted, ref } from 'vue';
+import { FitAddon } from 'xterm-addon-fit';
 import { WebLinksAddon } from 'xterm-addon-web-links';
 
 const props = defineProps({
@@ -23,10 +24,16 @@ onMounted(() => {
       fontFamily: 'monospace',
     });
 
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
+
     const linkAddon = new WebLinksAddon();
     term.loadAddon(linkAddon);
 
     term.open(terminal.value);
+
+    fitAddon.fit();
+
     term.write('WELCOME TO GOXTERM! https://github.com/WilliamSampaio/goxterm-cli\r\n');
 
     const ws = new WebSocket(`ws://${BACKEND_HOST}/ws/ssh?id=${props.id}`);
