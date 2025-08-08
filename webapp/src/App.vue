@@ -23,19 +23,24 @@
       <v-btn icon="mdi-magnify"></v-btn>
     </v-app-bar>
     <v-main>
-      <v-card v-if="data.tabs.length > 0">
-        <v-tabs v-model="data.tab">
-          <v-tab v-for="(t, i) in data.tabs" :text="t.name" :key="i" :value="t"></v-tab>
+      <v-card v-if="data.tabs.length > 0" :rounded="false">
+        <v-tabs v-model="data.tab" density="compact">
+          <v-tab v-for="(t, i) in data.tabs" :key="i" :value="t">
+            {{ t.name }}
+          </v-tab>
         </v-tabs>
+        <v-divider></v-divider>
         <v-tabs-window v-model="data.tab">
           <v-tabs-window-item v-for="(t, i) in data.tabs" :key="i" :value="t">
-            <v-sheet class="pa-2 text-center">
-              <v-btn variant="tonal" color="error" @click="" @dblclick="closeTab()" icon>
+            <v-sheet class="text-center">
+              <v-btn class="ma-1" variant="tonal" color="error" size="x-small" @dblclick="closeTab()" icon>
                 <v-icon icon="mdi-close"></v-icon>
                 <v-tooltip activator="parent" location="bottom">Double Click</v-tooltip>
               </v-btn>
+              <v-btn class="ma-1" variant="tonal" color="warning" :icon="lockIcon(t.lock)" size="x-small"
+                @click="lockTab(i)"></v-btn>
             </v-sheet>
-            <Terminal :id="t.sessionId" />
+            <Terminal :id="t.sessionId" :lock="t.lock" />
           </v-tabs-window-item>
         </v-tabs-window>
       </v-card>
@@ -75,7 +80,8 @@ const connect = (item) => {
   const len = data.tabs.push({
     id: data.tabs.length + 1,
     sessionId: item.id,
-    name: item.name
+    name: item.name,
+    lock: false
   });
   data.tab = data.tabs[len - 1];
 }
@@ -91,4 +97,15 @@ const closeTab = () => {
     }
   };
 }
+
+const lockTab = (index) => {
+  data.tabs[index].lock = !data.tabs[index].lock;
+}
+
+const lockIcon = (lock) => {
+  if (lock === true) {
+    return 'mdi mdi-lock';
+  }
+  return 'mdi mdi-lock-open-variant';
+};
 </script>
