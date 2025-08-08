@@ -12,16 +12,21 @@
       </template>
       <template v-slot:append>
         <v-divider></v-divider>
-        <v-btn href="https://github.com/WilliamSampaio/goxterm-cli" target="_blank" rel="noopener noreferrer"
-          append-icon="mdi mdi-github" variant="text" block>
-          GitHub
-        </v-btn>
       </template>
     </v-navigation-drawer>
     <v-app-bar elevation="0">
       <v-app-bar-title>GoXterm</v-app-bar-title>
       <v-btn icon="mdi-magnify"></v-btn>
     </v-app-bar>
+
+    <v-footer height="40" app>
+      <v-spacer></v-spacer>
+      2025 <v-divider class="mx-1" vertical></v-divider> v0.2.0
+      <v-btn href="https://github.com/WilliamSampaio/goxterm-cli" target="_blank" rel="noopener noreferrer"
+        icon="mdi mdi-github" variant="plain">
+      </v-btn>
+    </v-footer>
+
     <v-main>
       <v-card v-if="data.tabs.length > 0" :rounded="false">
         <v-tabs v-model="data.tab" density="compact">
