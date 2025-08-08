@@ -1,6 +1,14 @@
 <template>
   <v-app>
-    <v-navigation-drawer permanent>
+    <v-footer height="40" app>
+      <v-spacer></v-spacer>
+      <p class="text-medium-emphasis">v0.2.0</p>
+      <v-btn href="https://github.com/WilliamSampaio/goxterm-cli" target="_blank" rel="noopener noreferrer"
+        icon="mdi mdi-github" size="small" variant="plain">
+      </v-btn>
+    </v-footer>
+
+    <v-navigation-drawer v-model="drawer">
       <DrawerListItem v-for="item in data.sessions" :session="item" @selected="connect(item)" />
       <template v-slot:prepend>
         <div class="pa-2">
@@ -14,18 +22,12 @@
         <v-divider></v-divider>
       </template>
     </v-navigation-drawer>
+
     <v-app-bar elevation="0">
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-app-bar-title>GoXterm</v-app-bar-title>
       <v-btn icon="mdi-magnify"></v-btn>
     </v-app-bar>
-
-    <v-footer height="40" app>
-      <v-spacer></v-spacer>
-      2025 <v-divider class="mx-1" vertical></v-divider> v0.2.0
-      <v-btn href="https://github.com/WilliamSampaio/goxterm-cli" target="_blank" rel="noopener noreferrer"
-        icon="mdi mdi-github" variant="plain">
-      </v-btn>
-    </v-footer>
 
     <v-main>
       <v-card v-if="data.tabs.length > 0" :rounded="false">
@@ -57,10 +59,12 @@
 
 <script setup>
 import axios from 'axios'
-import { onMounted, reactive } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { BACKEND_HOST } from './utils';
 import Terminal from './components/Terminal.vue';
 import DrawerListItem from './components/DrawerListItem.vue';
+
+const drawer = ref(null);
 
 const data = reactive({
   drawer: null,
