@@ -26,6 +26,9 @@
     <v-app-bar elevation="0">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-app-bar-title>GoXterm</v-app-bar-title>
+      <v-btn v-for="shell in data.info?.shells" class="mx-3" variant="tonal" color="success" rounded="xl" size="large">
+        {{ shell }}
+      </v-btn>
       <v-btn icon="mdi-magnify"></v-btn>
     </v-app-bar>
 
@@ -70,12 +73,23 @@ const drawer = ref(null);
 
 const data = reactive({
   drawer: null,
+  info: null,
   sessions: [],
   tabs: [],
   tab: null,
 });
 
 onMounted(() => {
+  axios.get(`http://${BACKEND_HOST}/api/info`)
+    .then(response => {
+      if (response.headers['content-type'] === "application/json") {
+        data.info = response.data;
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+
   axios.get(`http://${BACKEND_HOST}/api/ssh/sessions`)
     .then(response => {
       if (response.headers['content-type'] === "application/json") {
