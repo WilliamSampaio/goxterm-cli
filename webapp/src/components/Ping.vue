@@ -3,7 +3,7 @@
     <v-progress-circular color="error" size="64" indeterminate></v-progress-circular>
   </v-overlay>
   <v-overlay v-model="offline" class="align-center justify-center" contained>
-    <v-sheet :elevation="24" :height="300" :width="300" rounded>
+    <v-sheet :elevation="24" rounded>
       <v-empty-state v-if="!data.external && data.backend">
         <template v-slot:media>
           <v-icon icon="mdi mdi-cloud-off-outline" color="error"></v-icon>
