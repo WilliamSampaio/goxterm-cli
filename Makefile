@@ -12,7 +12,7 @@ OS=$(shell uname -s)
 
 all: build
 
-build:
+build: clean
 	@mkdir -p $(DIST_DIR)
 ifeq ($(DOCKER),1)
 	@echo "🔧 Building $(APP_NAME) with Docker..."
