@@ -43,6 +43,7 @@ func serve(port int) {
 	http.HandleFunc("/api/ssh/sessions", api.GetListCredentials)
 
 	http.HandleFunc("/ws/ssh", websocket.SshWebSocketHandler)
+	http.HandleFunc("/ws/shell", websocket.ShellWebSocketHandler)
 
 	http.Handle("/", http.FileServer(http.Dir("/usr/local/share/goxterm")))
 

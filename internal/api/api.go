@@ -70,12 +70,12 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 		Version: constants.AppVersion,
 	}
 
-	if _, err := exec.LookPath("bash"); err == nil {
-		info.Shells = append(info.Shells, "bash")
+	if path, err := exec.LookPath("bash"); err == nil {
+		info.Shells = append(info.Shells, path)
 	}
 
-	if _, err := exec.LookPath("zsh"); err == nil {
-		info.Shells = append(info.Shells, "zsh")
+	if path, err := exec.LookPath("zsh"); err == nil {
+		info.Shells = append(info.Shells, path)
 	}
 
 	w.WriteHeader(http.StatusOK)

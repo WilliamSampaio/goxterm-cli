@@ -8,8 +8,13 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"os/exec"
+	"os/signal"
 	"strconv"
+	"syscall"
 
+	"github.com/creack/pty"
 	"github.com/gorilla/websocket"
 )
 
@@ -108,6 +113,58 @@ func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		stdinPipe.Write(msg)
+	}
+}
+
+func ShellWebSocketHandler(w http.ResponseWriter, r *http.Request) {
+
+	shell := r.URL.Query().Get("shell")
+
+	log.Println("WebSocket connection request for:", shell)
+
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("WebSocket upgrade error:", err)
+		return
+	}
+	defer ws.Close()
+
+	cmd := exec.Command(shell)
+
+	ptmx, err := pty.Start(cmd)
+	if err != nil {
+		log.Println("Erro ao iniciar PTY:", err)
+		return
+	}
+	defer func() {
+		_ = ptmx.Close()
+	}()
+
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		<-c
+		_ = ptmx.Close()
+		_ = ws.Close()
+	}()
+
+	go func() {
+		buf := make([]byte, 1024)
+		for {
+			n, err := ptmx.Read(buf)
+			if err != nil {
+				break
+			}
+			ws.WriteMessage(websocket.TextMessage, buf[:n])
+		}
+	}()
+
+	for {
+		_, msg, err := ws.ReadMessage()
+		if err != nil {
+			break
+		}
+		ptmx.Write(msg)
 	}
 }
 
