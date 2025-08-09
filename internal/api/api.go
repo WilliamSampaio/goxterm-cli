@@ -3,10 +3,12 @@ package api
 import (
 	"encoding/json"
 	"goxterm-cli/internal/config"
+	"goxterm-cli/internal/constants"
 	"goxterm-cli/internal/store"
 	"log"
 	"net"
 	"net/http"
+	"os/exec"
 	"time"
 )
 
@@ -20,12 +22,12 @@ type PingResult struct {
 func Ping(w http.ResponseWriter, r *http.Request) {
 	headers(w)
 
-	ip := "8.8.8.8"
-
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	ip := "8.8.8.8"
 
 	start := time.Now()
 
@@ -47,6 +49,40 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
+}
+
+func GetInfo(w http.ResponseWriter, r *http.Request) {
+	headers(w)
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	type Info struct {
+		AppName string   `json:"app_name"`
+		Version string   `json:"version"`
+		Shells  []string `json:"shells"`
+	}
+
+	info := Info{
+		AppName: constants.AppName,
+		Version: constants.AppVersion,
+	}
+
+	if _, err := exec.LookPath("bash"); err == nil {
+		info.Shells = append(info.Shells, "bash")
+	}
+
+	if _, err := exec.LookPath("zsh"); err == nil {
+		info.Shells = append(info.Shells, "zsh")
+	}
+
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(info); err != nil {
+		http.Error(w, "Error encoding response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func GetListCredentials(w http.ResponseWriter, r *http.Request) {

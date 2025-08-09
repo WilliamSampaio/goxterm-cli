@@ -39,6 +39,7 @@ func serve(port int) {
 	fmt.Println("Starting GoXterm web server...")
 
 	http.HandleFunc("/api/ping", api.Ping)
+	http.HandleFunc("/api/info", api.GetInfo)
 	http.HandleFunc("/api/ssh/sessions", api.GetListCredentials)
 
 	http.HandleFunc("/ws/ssh", websocket.SshWebSocketHandler)
