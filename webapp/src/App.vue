@@ -27,7 +27,7 @@
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-app-bar-title>GoXterm</v-app-bar-title>
       <v-btn v-for="shell in data.info?.shells" class="mx-3" variant="tonal" color="success" rounded="xl" size="large">
-        {{ shell }}
+        New {{ shell.bin }}
       </v-btn>
       <v-btn icon="mdi-magnify"></v-btn>
     </v-app-bar>
