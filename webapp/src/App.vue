@@ -54,6 +54,7 @@
       <v-empty-state v-else headline="Whoops, 404" title="Page not found"
         text="The page you were looking for does not exist" icon="mdi mdi-console"></v-empty-state>
     </v-main>
+    <Ping />
   </v-app>
 </template>
 
@@ -63,6 +64,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { BACKEND_HOST } from './utils';
 import Terminal from './components/Terminal.vue';
 import DrawerListItem from './components/DrawerListItem.vue';
+import Ping from './components/Ping.vue';
 
 const drawer = ref(null);
 
