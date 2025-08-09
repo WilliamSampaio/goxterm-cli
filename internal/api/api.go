@@ -42,6 +42,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
+		result.Error = err.Error()
 		log.Println("Ping failed:", err)
 	} else {
 		conn.Close()
@@ -59,10 +60,15 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	type Shell struct {
+		Bin  string `json:"bin"`
+		Path string `json:"path"`
+	}
+
 	type Info struct {
-		AppName string   `json:"app_name"`
-		Version string   `json:"version"`
-		Shells  []string `json:"shells"`
+		AppName string  `json:"app_name"`
+		Version string  `json:"version"`
+		Shells  []Shell `json:"shells"`
 	}
 
 	info := Info{
@@ -71,11 +77,11 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if path, err := exec.LookPath("bash"); err == nil {
-		info.Shells = append(info.Shells, path)
+		info.Shells = append(info.Shells, Shell{Bin: "bash", Path: path})
 	}
 
 	if path, err := exec.LookPath("zsh"); err == nil {
-		info.Shells = append(info.Shells, path)
+		info.Shells = append(info.Shells, Shell{Bin: "zsh", Path: path})
 	}
 
 	w.WriteHeader(http.StatusOK)
