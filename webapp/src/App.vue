@@ -26,7 +26,10 @@
     <v-app-bar elevation="0">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-app-bar-title>GoXterm</v-app-bar-title>
-      <v-btn v-for="shell in data.info?.shells" class="mx-3" variant="tonal" color="success" rounded="xl"
+      <v-btn class="mx-2" variant="tonal" color="info" rounded="xl" prepend-icon="mdi mdi-lightning-bolt">
+        SSH
+      </v-btn>
+      <v-btn v-for="shell in data.info?.shells" class="mx-2" variant="tonal" color="success" rounded="xl"
         prepend-icon="mdi mdi-plus" @click="connect(shell)">
         {{ shell.bin }}{{ shell.default ? ' (default)' : '' }}
       </v-btn>
