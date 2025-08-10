@@ -4,6 +4,10 @@
   <div class="pa-2 bg-black" ref="terminal"></div>
   <v-fab v-if="data.reconnect" color="primary" extended text="refresh" variant="tonal" prepend-icon="mdi mdi-reload"
     location="center center" @click="refresh" absolute offset></v-fab>
+  <v-fab v-if="data.locked" color="infor" variant="plain" :size="128" location="center center" absolute offset icon
+    :disabled="true">
+    <v-icon icon="mdi mdi-lock" :size="96" color="rgba(255,255,255,1)"></v-icon>
+  </v-fab>
 </template>
 
 <script setup>
@@ -25,7 +29,8 @@ const ws = ref(null);
 
 const data = reactive({
   message: null,
-  reconnect: false
+  reconnect: false,
+  locked: false
 });
 
 const refresh = () => {
@@ -98,11 +103,12 @@ watch(() => props.lock, (locked) => {
   if (xTerm.value) {
     xTerm.value.options.disableStdin = locked;
     xTerm.value.options.cursorBlink = !locked;
-    if (locked) {
-      ws.value.send("# LOCKED\r");
-    } else {
-      ws.value.send("# UNLOCKED\r");
-    }
+    data.locked = locked;
+    // if (locked) {
+    //   ws.value.send("# LOCKED\r");
+    // } else {
+    //   ws.value.send("# UNLOCKED\r");
+    // }
   }
 });
 
