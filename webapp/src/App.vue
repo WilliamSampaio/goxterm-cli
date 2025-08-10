@@ -61,7 +61,7 @@
       <v-empty-state v-else headline="Whoops, 404" title="Page not found"
         text="The page you were looking for does not exist" icon="mdi mdi-console"></v-empty-state>
     </v-main>
-    <Ping />
+    <Ping @reconnect="initialize" />
   </v-app>
 </template>
 
@@ -72,6 +72,7 @@ import { BACKEND_HOST } from './utils';
 import Terminal from './components/Terminal.vue';
 import DrawerListItem from './components/DrawerListItem.vue';
 import Ping from './components/Ping.vue';
+import { getInfo, getSshSessions } from './plugins/api';
 
 const drawer = ref(null);
 
@@ -84,7 +85,11 @@ const data = reactive({
 });
 
 onMounted(() => {
-  axios.get(`http://${BACKEND_HOST}/api/info`)
+  initialize();
+});
+
+const initialize = () => {
+  getInfo()
     .then(response => {
       if (response.headers['content-type'] === "application/json") {
         data.info = response.data;
@@ -94,7 +99,7 @@ onMounted(() => {
       console.error('Error fetching data:', error);
     });
 
-  axios.get(`http://${BACKEND_HOST}/api/ssh/sessions`)
+  getSshSessions()
     .then(response => {
       if (response.headers['content-type'] === "application/json") {
         data.sessions = response.data || [];
@@ -103,7 +108,7 @@ onMounted(() => {
     .catch(error => {
       console.error('Error fetching data:', error);
     });
-});
+}
 
 const connect = (item) => {
   const len = data.tabs.push({

@@ -39,27 +39,15 @@
 </template>
 
 <script setup>
-import { BACKEND_HOST } from '@/utils';
-import axios from 'axios';
-import { computed, onMounted, reactive } from 'vue';
+import { ping } from '@/plugins/api';
+import { computed, onMounted, reactive, watch } from 'vue';
 
 const data = reactive({
   external: null,
   backend: null
 });
 
-const ping = () => {
-  axios.get(`http://${BACKEND_HOST}/api/ping`)
-    .then(response => {
-      if (response.headers['content-type'] === "application/json") {
-        data.external = response.data?.alive || false;
-        data.backend = true;
-      }
-    })
-    .catch(() => {
-      data.backend = false;
-    });
-}
+const emit = defineEmits(['reconnect']);
 
 onMounted(() => {
   ping();
@@ -72,5 +60,9 @@ const loading = computed(() => {
 
 const offline = computed(() => {
   return !data.backend || !data.external ? true : false;
+});
+
+watch(offline, (newv, oldv) => {
+  if (newv != oldv && newv === false) emit('reconnect');
 });
 </script>
