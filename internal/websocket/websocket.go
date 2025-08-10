@@ -8,11 +8,8 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"os/exec"
-	"os/signal"
 	"strconv"
-	"syscall"
 
 	"github.com/creack/pty"
 	"github.com/gorilla/websocket"
@@ -107,6 +104,11 @@ func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		io.Copy(&wsWriter{ws}, stderrPipe)
 	}()
 
+	go func() {
+		session.Wait()
+		ws.Close()
+	}()
+
 	for {
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
@@ -118,9 +120,9 @@ func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 func ShellWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
-	shell := r.URL.Query().Get("shell")
+	path := r.URL.Query().Get("path")
 
-	log.Println("WebSocket connection request for:", shell)
+	log.Println("WebSocket connection request for:", path)
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -129,34 +131,22 @@ func ShellWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 
-	cmd := exec.Command(shell)
+	cmd := exec.Command(path)
 
 	ptmx, err := pty.Start(cmd)
 	if err != nil {
 		log.Println("Erro ao iniciar PTY:", err)
 		return
 	}
-	defer func() {
-		_ = ptmx.Close()
+	defer ptmx.Close()
+
+	go func() {
+		io.Copy(&wsWriter{ws}, ptmx)
 	}()
 
 	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-		<-c
-		_ = ptmx.Close()
-		_ = ws.Close()
-	}()
-
-	go func() {
-		buf := make([]byte, 1024)
-		for {
-			n, err := ptmx.Read(buf)
-			if err != nil {
-				break
-			}
-			ws.WriteMessage(websocket.TextMessage, buf[:n])
-		}
+		cmd.Wait()
+		ws.Close()
 	}()
 
 	for {

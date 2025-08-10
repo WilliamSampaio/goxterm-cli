@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
 	"time"
 )
@@ -61,8 +62,9 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type Shell struct {
-		Bin  string `json:"bin"`
-		Path string `json:"path"`
+		Bin     string `json:"bin"`
+		Path    string `json:"path"`
+		Default bool   `json:"default"`
 	}
 
 	type Info struct {
@@ -76,12 +78,18 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 		Version: constants.AppVersion,
 	}
 
-	if path, err := exec.LookPath("bash"); err == nil {
-		info.Shells = append(info.Shells, Shell{Bin: "bash", Path: path})
-	}
+	defaultShell := os.Getenv("SHELL")
 
-	if path, err := exec.LookPath("zsh"); err == nil {
-		info.Shells = append(info.Shells, Shell{Bin: "zsh", Path: path})
+	shells := []string{"bash", "zsh"}
+
+	for _, bin := range shells {
+		if path, err := exec.LookPath(bin); err == nil {
+			isDefault := false
+			if (defaultShell != "") && (defaultShell == path) {
+				isDefault = true
+			}
+			info.Shells = append(info.Shells, Shell{Bin: bin, Path: path, Default: isDefault})
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)

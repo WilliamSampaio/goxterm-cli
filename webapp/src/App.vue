@@ -26,8 +26,9 @@
     <v-app-bar elevation="0">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-app-bar-title>GoXterm</v-app-bar-title>
-      <v-btn v-for="shell in data.info?.shells" class="mx-3" variant="tonal" color="success" rounded="xl" size="large">
-        New {{ shell.bin }}
+      <v-btn v-for="shell in data.info?.shells" class="mx-3" variant="tonal" color="success" rounded="xl"
+        prepend-icon="mdi mdi-plus" @click="connect(shell)">
+        {{ shell.bin }}{{ shell.default ? ' (default)' : '' }}
       </v-btn>
       <v-btn icon="mdi-magnify"></v-btn>
     </v-app-bar>
@@ -50,7 +51,7 @@
               <v-btn class="ma-1" variant="tonal" color="warning" :icon="lockIcon(t.lock)" size="x-small"
                 @click="lockTab(i)"></v-btn>
             </v-sheet>
-            <Terminal :id="t.sessionId" :lock="t.lock" />
+            <Terminal :sshSessionId="t.sshSessionId" :shellPath="t.shellPath" :lock="t.lock" />
           </v-tabs-window-item>
         </v-tabs-window>
       </v-card>
@@ -104,8 +105,9 @@ onMounted(() => {
 const connect = (item) => {
   const len = data.tabs.push({
     id: data.tabs.length + 1,
-    sessionId: item.id,
-    name: item.name,
+    sshSessionId: item.id || null,
+    shellPath: item.path || null,
+    name: item.name || item.bin,
     lock: false
   });
   data.tab = data.tabs[len - 1];
