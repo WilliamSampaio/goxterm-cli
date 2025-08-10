@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { ping } from '@/plugins/api';
+import { getPing } from '@/plugins/api';
 import { computed, onMounted, reactive, watch } from 'vue';
 
 const data = reactive({
@@ -48,6 +48,19 @@ const data = reactive({
 });
 
 const emit = defineEmits(['reconnect']);
+
+const ping = () => {
+  getPing()
+    .then(response => {
+      if (response.headers['content-type'] === "application/json") {
+        data.external = response.data?.alive || false;
+        data.backend = true;
+      }
+    })
+    .catch(() => {
+      data.backend = false;
+    });
+}
 
 onMounted(() => {
   ping();
