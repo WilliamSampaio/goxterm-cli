@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { getPing } from '@/plugins/api';
+import { getPing } from '@/services/api';
 import { computed, onMounted, reactive, watch } from 'vue';
 
 const data = reactive({

@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import { shell, ssh } from '@/plugins/websocket';
+import { shell, ssh } from '@/services/websocket';
 import { Terminal } from '@xterm/xterm';
 import { onMounted, reactive, ref, watch } from 'vue';
 import { FitAddon } from 'xterm-addon-fit';

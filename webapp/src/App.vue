@@ -37,22 +37,23 @@
     </v-app-bar>
 
     <v-main>
-      <v-card v-if="data.tabs.length > 0" :rounded="false">
-        <v-tabs v-model="data.tab" density="compact">
-          <v-tab v-for="(t, i) in data.tabs" :key="i" :value="t">
+      <v-card v-if="terminals.items.length > 0" :rounded="false">
+        <v-tabs v-model="terminals.current" density="compact">
+          <v-tab v-for="(t, i) in terminals.items" :key="i" :value="t">
             {{ t.name }}
           </v-tab>
         </v-tabs>
         <v-divider></v-divider>
-        <v-tabs-window v-model="data.tab">
-          <v-tabs-window-item v-for="(t, i) in data.tabs" :key="i" :value="t">
+        <v-tabs-window v-model="terminals.current">
+          <v-tabs-window-item v-for="(t, i) in terminals.items" :key="i" :value="t">
             <v-sheet class="text-center">
-              <v-btn class="ma-1" variant="tonal" color="error" size="x-small" @dblclick="closeTab()" icon>
+              <v-btn class="ma-1" variant="tonal" color="error" size="x-small" @dblclick="terminals.remove(t.id)" icon>
                 <v-icon icon="mdi-close"></v-icon>
                 <v-tooltip activator="parent" location="bottom">Double Click</v-tooltip>
               </v-btn>
               <v-btn class="ma-1" variant="tonal" color="warning" :icon="lockIcon(t.lock)" size="x-small"
-                @click="lockTab(i)"></v-btn>
+                @click="terminals.toggleLock(t.id)">
+              </v-btn>
             </v-sheet>
             <Terminal :sshSessionId="t.sshSessionId" :shellPath="t.shellPath" :lock="t.lock" />
           </v-tabs-window-item>
@@ -66,22 +67,21 @@
 </template>
 
 <script setup>
-import axios from 'axios'
 import { onMounted, reactive, ref } from 'vue'
-import { BACKEND_HOST } from './utils';
 import Terminal from './components/Terminal.vue';
 import DrawerListItem from './components/DrawerListItem.vue';
 import Ping from './components/Ping.vue';
-import { getInfo, getSshSessions } from './plugins/api';
+import { getInfo, getSshSessions } from './services/api';
+import { useTerminalsStore } from './stores/terminals';
 
 const drawer = ref(null);
+
+const terminals = useTerminalsStore();
 
 const data = reactive({
   drawer: null,
   info: null,
   sessions: [],
-  tabs: [],
-  tab: null,
 });
 
 onMounted(() => {
@@ -111,30 +111,7 @@ const initialize = () => {
 }
 
 const connect = (item) => {
-  const len = data.tabs.push({
-    id: data.tabs.length + 1,
-    sshSessionId: item.id || null,
-    shellPath: item.path || null,
-    name: item.name || item.bin,
-    lock: false
-  });
-  data.tab = data.tabs[len - 1];
-}
-
-const closeTab = () => {
-  const index = data.tabs.indexOf(data.tab);
-  if (data.tabs[index] !== undefined) {
-    data.tabs.splice(index, 1);
-    if (index > data.tabs.length - 1) {
-      data.tab = data.tabs[data.tabs.length - 1];
-    } else {
-      data.tab = data.tabs[index];
-    }
-  };
-}
-
-const lockTab = (index) => {
-  data.tabs[index].lock = !data.tabs[index].lock;
+  terminals.add(item.id, item.path, item.name || item.bin);
 }
 
 const lockIcon = (lock) => {
