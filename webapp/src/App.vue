@@ -37,7 +37,7 @@
     </v-app-bar>
 
     <v-main>
-      <v-card v-if="terminals.items.length > 0" :rounded="false">
+      <v-card v-if="terminals.items.length > 0" :rounded="false" style="height: 100%;">
         <v-tabs v-model="terminals.current" density="compact">
           <v-tab v-for="(t, i) in terminals.items" :key="i" :value="t">
             {{ t.name }}

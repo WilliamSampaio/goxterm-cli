@@ -2,7 +2,7 @@
   <TerminalTopBar :terminalId="terminals.current.id" :locked="terminals.current.lock" @term-action="treatAction" />
   <v-alert v-if="data.message !== null" class="ma-3" :title="data.message.title" :text="data.message.text"
     :type="data.message.type" variant="tonal" density="compact" @click:close="data.message = null" closable></v-alert>
-  <div class="pa-2 bg-black" ref="terminal"></div>
+  <div class="px-1 pt-1 pb-6 bg-black" ref="terminal" style="height: 90%;"></div>
   <v-fab v-if="data.reconnect" color="primary" extended text="refresh" variant="tonal" prepend-icon="mdi mdi-reload"
     location="center center" @click="refresh" absolute offset></v-fab>
   <v-fab v-if="terminals.current.lock" color="infor" variant="plain" :size="128" location="center center" absolute
