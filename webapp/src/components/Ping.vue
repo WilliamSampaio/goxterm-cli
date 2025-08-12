@@ -2,24 +2,17 @@
   <v-overlay v-model="loading" class="align-center justify-center">
     <v-progress-circular color="error" size="64" indeterminate></v-progress-circular>
   </v-overlay>
-  <v-overlay v-model="offline" class="align-center justify-center" contained>
+  <span v-if="data.external && data.backend">
+    <v-icon icon="mdi mdi-circle" size="x-small" color="rgb(0,255,0)"></v-icon>
+    Online
+  </span>
+  <span v-else-if="!data.external && data.backend">
+    <v-icon icon="mdi mdi-circle" size="x-small" color="rgb(255,0,0)"></v-icon>
+    Offline
+  </span>
+  <v-overlay v-else-if="!data.backend" v-model="offline" class="align-center justify-center">
     <v-sheet :elevation="24" rounded>
-      <v-empty-state v-if="!data.external && data.backend">
-        <template v-slot:media>
-          <v-icon icon="mdi mdi-cloud-off-outline" color="error"></v-icon>
-        </template>
-        <template v-slot:headline>
-          <div class="text-h5">
-            You are offline!
-          </div>
-        </template>
-        <template v-slot:title>
-          <div class="text-h6">
-            Check your internet connection
-          </div>
-        </template>
-      </v-empty-state>
-      <v-empty-state v-else-if="!data.backend">
+      <v-empty-state>
         <template v-slot:media>
           <v-icon icon="mdi mdi-connection" color="error"></v-icon>
         </template>

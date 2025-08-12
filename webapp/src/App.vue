@@ -1,8 +1,9 @@
 <template>
   <v-app>
     <v-footer height="40" app>
+      <Ping @reconnect="initialize" />
       <v-spacer></v-spacer>
-      <p class="text-medium-emphasis">v0.2.0</p>
+      <p class="text-medium-emphasis">v{{ data.info.version }}</p>
       <v-btn href="https://github.com/WilliamSampaio/goxterm-cli" target="_blank" rel="noopener noreferrer"
         icon="mdi mdi-github" size="small" variant="plain">
       </v-btn>
@@ -33,7 +34,9 @@
         prepend-icon="mdi mdi-plus" @click="connect(shell)">
         {{ shell.bin }}{{ shell.default ? ' (default)' : '' }}
       </v-btn>
-      <v-btn icon="mdi-magnify"></v-btn>
+      <v-btn class="mx-2" icon="mdi-magnify"></v-btn>
+      <!-- <v-divider vertical inset></v-divider>
+      <v-btn class="mx-1" icon="mdi-cog"></v-btn> -->
     </v-app-bar>
 
     <v-main>
@@ -49,7 +52,6 @@
       <v-empty-state v-else headline="Whoops, 404" title="Page not found"
         text="The page you were looking for does not exist" icon="mdi mdi-console"></v-empty-state>
     </v-main>
-    <Ping @reconnect="initialize" />
   </v-app>
 </template>
 
