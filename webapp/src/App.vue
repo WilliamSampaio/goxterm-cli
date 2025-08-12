@@ -44,20 +44,7 @@
           </v-tab>
         </v-tabs>
         <v-divider></v-divider>
-        <v-tabs-window v-model="terminals.current">
-          <v-tabs-window-item v-for="(t, i) in terminals.items" :key="i" :value="t">
-            <v-sheet class="text-center">
-              <v-btn class="ma-1" variant="tonal" color="error" size="x-small" @dblclick="terminals.remove(t.id)" icon>
-                <v-icon icon="mdi-close"></v-icon>
-                <v-tooltip activator="parent" location="bottom">Double Click</v-tooltip>
-              </v-btn>
-              <v-btn class="ma-1" variant="tonal" color="warning" :icon="lockIcon(t.lock)" size="x-small"
-                @click="terminals.toggleLock(t.id)">
-              </v-btn>
-            </v-sheet>
-            <Terminal :sshSessionId="t.sshSessionId" :shellPath="t.shellPath" :lock="t.lock" />
-          </v-tabs-window-item>
-        </v-tabs-window>
+        <Terminals />
       </v-card>
       <v-empty-state v-else headline="Whoops, 404" title="Page not found"
         text="The page you were looking for does not exist" icon="mdi mdi-console"></v-empty-state>
@@ -68,15 +55,15 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import Terminal from './components/Terminal.vue';
+import Terminals from './components/Terminals.vue';
 import DrawerListItem from './components/DrawerListItem.vue';
 import Ping from './components/Ping.vue';
 import { getInfo, getSshSessions } from './services/api';
 import { useTerminalsStore } from './stores/terminals';
 
-const drawer = ref(null);
-
 const terminals = useTerminalsStore();
+
+const drawer = ref(null);
 
 const data = reactive({
   drawer: null,
@@ -113,11 +100,4 @@ const initialize = () => {
 const connect = (item) => {
   terminals.add(item.id, item.path, item.name || item.bin);
 }
-
-const lockIcon = (lock) => {
-  if (lock === true) {
-    return 'mdi mdi-lock';
-  }
-  return 'mdi mdi-lock-open-variant';
-};
 </script>

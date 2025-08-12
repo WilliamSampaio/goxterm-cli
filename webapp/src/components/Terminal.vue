@@ -1,11 +1,12 @@
 <template>
+  <TerminalTopBar :terminalId="terminals.current.id" :locked="terminals.current.lock" @term-action="treatAction" />
   <v-alert v-if="data.message !== null" class="ma-3" :title="data.message.title" :text="data.message.text"
     :type="data.message.type" variant="tonal" density="compact" @click:close="data.message = null" closable></v-alert>
   <div class="pa-2 bg-black" ref="terminal"></div>
   <v-fab v-if="data.reconnect" color="primary" extended text="refresh" variant="tonal" prepend-icon="mdi mdi-reload"
     location="center center" @click="refresh" absolute offset></v-fab>
-  <v-fab v-if="data.locked" color="infor" variant="plain" :size="128" location="center center" absolute offset icon
-    :disabled="true">
+  <v-fab v-if="terminals.current.lock" color="infor" variant="plain" :size="128" location="center center" absolute
+    offset icon :disabled="true">
     <v-icon icon="mdi mdi-lock" :size="96" color="rgba(255,255,255,1)"></v-icon>
   </v-fab>
 </template>
@@ -16,12 +17,11 @@ import { Terminal } from '@xterm/xterm';
 import { onMounted, reactive, ref, watch } from 'vue';
 import { FitAddon } from 'xterm-addon-fit';
 import { WebLinksAddon } from 'xterm-addon-web-links';
+import TerminalTopBar from './TerminalTopBar.vue';
+import { ACTIONS } from '@/constants/terminalActions';
+import { useTerminalsStore } from '@/stores/terminals';
 
-const props = defineProps({
-  sshSessionId: null,
-  shellPath: null,
-  lock: false
-});
+const terminals = useTerminalsStore();
 
 const terminal = ref(null);
 const xTerm = ref(null);
@@ -29,8 +29,7 @@ const ws = ref(null);
 
 const data = reactive({
   message: null,
-  reconnect: false,
-  locked: false
+  reconnect: false
 });
 
 const refresh = () => {
@@ -65,10 +64,10 @@ const initXterm = () => {
 
 const initWebSocket = () => {
 
-  if (props.sshSessionId) {
-    ws.value = ssh(props.sshSessionId);
-  } else if (props.shellPath) {
-    ws.value = shell(props.shellPath);
+  if (terminals.current.sshSessionId) {
+    ws.value = ssh(terminals.current.sshSessionId);
+  } else if (terminals.current.shellPath) {
+    ws.value = shell(terminals.current.shellPath);
   } else {
     return;
   }
@@ -99,7 +98,18 @@ const initWebSocket = () => {
   data.reconnect = false;
 }
 
-watch(() => props.lock, (locked) => {
+const treatAction = (action) => {
+  switch (action.type) {
+    case ACTIONS.CLOSE:
+      terminals.remove(action.terminalId);
+      break;
+    case ACTIONS.LOCK:
+      terminals.toggleLock(action.terminalId);
+      break;
+  }
+}
+
+watch(() => terminals.current.lock, (locked) => {
   if (xTerm.value) {
     xTerm.value.options.disableStdin = locked;
     xTerm.value.options.cursorBlink = !locked;

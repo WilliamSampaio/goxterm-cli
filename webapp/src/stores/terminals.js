@@ -9,7 +9,7 @@ export const useTerminalsStore = defineStore('terminals', () => {
 
   function add(sshSessionId, shellPath, name, lock = false) {
     const terminal = {
-      id: nextIndex.value++,
+      id: Date.now(),
       sshSessionId: sshSessionId || null,
       shellPath: shellPath || null,
       name: name,
