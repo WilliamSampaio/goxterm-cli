@@ -6,7 +6,6 @@ import (
 	"goxterm-cli/internal/constants"
 	"goxterm-cli/internal/store"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -14,7 +13,6 @@ import (
 )
 
 type PingResult struct {
-	IP       string  `json:"ip"`
 	Alive    bool    `json:"alive"`
 	Duration float64 `json:"duration_ms"`
 	Error    string  `json:"error,omitempty"`
@@ -28,26 +26,26 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ip := "8.8.8.8"
+	var result = PingResult{}
+
+	client := http.Client{
+		Timeout: 2 * time.Second,
+	}
 
 	start := time.Now()
 
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(ip, "53"), 2*time.Second)
-
-	duration := time.Since(start)
-
-	result := PingResult{
-		IP:       ip,
-		Alive:    err == nil,
-		Duration: float64(duration.Microseconds()),
-	}
-
+	resp, err := client.Get("https://www.google.com")
 	if err != nil {
 		result.Error = err.Error()
 		log.Println("Ping failed:", err)
 	} else {
-		conn.Close()
+		resp.Body.Close()
 	}
+
+	duration := time.Since(start)
+
+	result.Alive = err == nil && resp.StatusCode == http.StatusOK
+	result.Duration = float64(duration.Microseconds())
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)

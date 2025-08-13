@@ -3,7 +3,7 @@
     <v-footer height="40" app>
       <Ping @reconnect="initialize" />
       <v-spacer></v-spacer>
-      <p class="text-medium-emphasis">v{{ data.info.version }}</p>
+      <p class="text-medium-emphasis">v{{ data.info?.version }}</p>
       <v-btn href="https://github.com/WilliamSampaio/goxterm-cli" target="_blank" rel="noopener noreferrer"
         icon="mdi mdi-github" size="small" variant="plain">
       </v-btn>
@@ -27,7 +27,7 @@
     <v-app-bar elevation="0">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-app-bar-title>GoXterm</v-app-bar-title>
-      <v-btn class="mx-2" variant="tonal" color="info" rounded="xl" prepend-icon="mdi mdi-lightning-bolt">
+      <v-btn class="mx-2" variant="tonal" color="primary" rounded="xl" prepend-icon="mdi mdi-lightning-bolt">
         SSH
       </v-btn>
       <v-btn v-for="shell in data.info?.shells" class="mx-2" variant="tonal" color="success" rounded="xl"

@@ -1,10 +1,25 @@
 <template>
   <TerminalTopBar :terminalId="terminals.current.id" :locked="terminals.current.lock" @term-action="treatAction" />
-  <v-alert v-if="data.message !== null" class="ma-3" :title="data.message.title" :text="data.message.text"
-    :type="data.message.type" variant="tonal" density="compact" @click:close="data.message = null" closable></v-alert>
+
   <div class="px-1 pt-1 pb-6 bg-black" ref="terminal" style="height: 90%;"></div>
-  <v-fab v-if="data.reconnect" color="primary" extended text="refresh" variant="tonal" prepend-icon="mdi mdi-reload"
-    location="center center" @click="refresh" absolute offset></v-fab>
+
+  <v-dialog v-model="data.reconnect" max-width="500" contained persistent>
+    <v-card v-if="data.message !== null" :title="data.message.title">
+      <template v-slot:prepend>
+        <v-icon :icon="'$' + data.message.type" :color="data.message.type"></v-icon>
+      </template>
+      <v-card-text>
+        {{ data.message.text }}
+      </v-card-text>
+      <v-card-actions>
+        <v-btn variant="tonal" color="error" text="close" rounded
+          @click="terminals.remove(terminals.current.id)"></v-btn>
+        <v-spacer></v-spacer>
+        <v-btn variant="tonal" color="success" text="refresh" prepend-icon="mdi mdi-reload" rounded
+          @click="refresh"></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <v-fab v-if="terminals.current.lock" color="infor" variant="plain" :size="128" location="center center" absolute
     offset icon :disabled="true">
     <v-icon icon="mdi mdi-lock" :size="96" color="rgba(255,255,255,1)"></v-icon>
@@ -82,7 +97,7 @@ const initWebSocket = () => {
       text: `${event.code} (${event.type}): ${event.reason || '...'}`,
       type: 'error'
     }
-    xTerm.value.write('\r\n\x1b[31m*** Connection closed ***\x1b[0m\r\n');
+    // xTerm.value.write('\r\n\x1b[31m*** Connection closed ***\x1b[0m\r\n');
   };
 
   ws.value.onerror = error => {
@@ -92,10 +107,16 @@ const initWebSocket = () => {
       text: error.message || '...',
       type: 'error'
     }
-    xTerm.value.write('\r\n\x1b[31m*** Communication error ***\x1b[0m\r\n');
+    // xTerm.value.write('\r\n\x1b[31m*** Communication error ***\x1b[0m\r\n');
   };
 
   data.reconnect = false;
+}
+
+const clear = () => {
+  xTerm.value.clear(); // clear only frontend
+  ws.value.send('\x0C'); // send Ctrl+L to backend
+  xTerm.value.focus();
 }
 
 const treatAction = (action) => {
@@ -106,6 +127,9 @@ const treatAction = (action) => {
     case ACTIONS.LOCK:
       terminals.toggleLock(action.terminalId);
       break;
+    case ACTIONS.CLEAR:
+      clear();
+      break;
   }
 }
 
@@ -114,6 +138,8 @@ watch(() => terminals.current.lock, (locked) => {
     xTerm.value.options.disableStdin = locked;
     xTerm.value.options.cursorBlink = !locked;
     data.locked = locked;
+
+    if (locked === false) xTerm.value.focus();
     // if (locked) {
     //   ws.value.send("# LOCKED\r");
     // } else {
@@ -126,6 +152,8 @@ onMounted(() => {
   if (terminal.value) {
     initXterm();
     initWebSocket();
+
+    xTerm.value.focus();
   }
 });
 </script>
