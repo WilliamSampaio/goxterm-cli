@@ -5,11 +5,12 @@ export const useTerminalsStore = defineStore('terminals', () => {
   const items = ref([]);
   const current = ref(null);
 
-  function add(sshSessionId, shellPath, name, lock = false) {
+  function add(sshSessionId, shellPath, sshConnection, name, lock = false) {
     const terminal = {
       id: Date.now(),
       sshSessionId: sshSessionId || null,
       shellPath: shellPath || null,
+      sshConnection: sshConnection || { connection: null, password: null },
       name: name,
       lock: lock
     }

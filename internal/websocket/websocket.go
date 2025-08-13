@@ -8,8 +8,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/creack/pty"
 	"github.com/gorilla/websocket"
@@ -23,15 +25,13 @@ var upgrader = websocket.Upgrader{
 
 func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
-	strId := r.URL.Query().Get("id")
-
-	id, err := strconv.Atoi(strId)
+	credential, err := getCredential(r.URL.Query())
 	if err != nil {
-		log.Println("Error converting string to int:", err)
+		log.Println("Error get credential:", err)
 		return
 	}
 
-	log.Println("WebSocket connection request for:", id)
+	log.Printf("WebSocket connection request for: %s@%s:%d\n", credential.User, credential.Host, credential.Port)
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -39,33 +39,6 @@ func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer ws.Close()
-
-	cfg, err := config.Load()
-	if err != nil {
-		log.Println("Error loading configuration:", err)
-		http.Error(w, "Error loading configuration", http.StatusInternalServerError)
-		return
-	}
-
-	if !store.Exists(cfg.StorePath) {
-		log.Println("Store does not exist or is not located:", cfg.StorePath)
-		http.Error(w, "Store does not exist or is not located", http.StatusNotFound)
-		return
-	}
-
-	db, err := store.Load(cfg.StorePath)
-	if err != nil {
-		log.Println("Error loading store:", err)
-		http.Error(w, "Error loading store", http.StatusInternalServerError)
-		return
-	}
-
-	credential, err := db.GetSshSession(id)
-	if err != nil {
-		log.Printf("Connection '%d' not found in the store.\n", id)
-		http.Error(w, fmt.Sprintf("Connection '%d' not found in the store", id), http.StatusNotFound)
-		return
-	}
 
 	client, err := sshclient.ConnectSSH(*credential)
 	if err != nil {
@@ -165,4 +138,85 @@ type wsWriter struct {
 func (w *wsWriter) Write(p []byte) (int, error) {
 	err := w.ws.WriteMessage(websocket.TextMessage, p)
 	return len(p), err
+}
+
+func getCredential(values url.Values) (*store.SshSession, error) {
+	id := values.Get("id")
+	connection := values.Get("connection")
+	password := values.Get("password")
+
+	if id != "" {
+		return getCredentialById(id)
+	}
+
+	if connection != "" && password != "" {
+		return getCredentialBySshConnection(connection, password)
+	}
+
+	return nil, fmt.Errorf("no credentials found")
+}
+
+func getCredentialById(idStr string) (*store.SshSession, error) {
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg, err := config.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	if !store.Exists(cfg.StorePath) {
+		return nil, err
+	}
+
+	db, err := store.Load(cfg.StorePath)
+	if err != nil {
+		return nil, err
+	}
+
+	credential, err := db.GetSshSession(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return credential, nil
+}
+
+func getCredentialBySshConnection(connection string, password string) (*store.SshSession, error) {
+	split1 := strings.Split(connection, "@")
+	if len(split1) != 2 || split1[0] == "" || split1[1] == "" {
+		return nil, fmt.Errorf("invalid connection string format. use 'user@host:port'")
+	}
+
+	user := split1[0]
+	host := ""
+	port := 22
+
+	split2 := strings.Split(split1[1], ":")
+
+	if len(split2) == 2 {
+
+		p, err := strconv.Atoi(split2[1])
+		if err != nil {
+			return nil, fmt.Errorf("invalid port number: %s", split2[1])
+		}
+
+		port = p
+	}
+
+	host = split2[0]
+
+	credential := store.SshSession{
+		Session: store.Session{
+			Name: "",
+		},
+		Host:     host,
+		Port:     port,
+		User:     user,
+		Password: password,
+	}
+
+	return &credential, nil
 }

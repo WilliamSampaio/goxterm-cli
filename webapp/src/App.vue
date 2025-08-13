@@ -27,14 +27,18 @@
     <v-app-bar elevation="0">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-app-bar-title>GoXterm</v-app-bar-title>
-      <v-btn class="mx-2" variant="tonal" color="primary" rounded="xl" prepend-icon="mdi mdi-lightning-bolt">
+      <v-btn class="mx-2" variant="tonal" color="primary" rounded="xl" prepend-icon="mdi mdi-lightning-bolt"
+        @click="data.sshQuickAccessDialog = true">
         SSH
       </v-btn>
       <v-btn v-for="shell in data.info?.shells" class="mx-2" variant="tonal" color="success" rounded="xl"
         prepend-icon="mdi mdi-plus" @click="connect(shell)">
         {{ shell.bin }}{{ shell.default ? ' (default)' : '' }}
       </v-btn>
-      <v-btn class="mx-2" icon="mdi-magnify"></v-btn>
+      <v-btn class="mx-2" icon>
+        <v-icon icon="mdi-magnify"></v-icon>
+        <v-tooltip activator="parent" location="bottom">{{ '[F1]' }}</v-tooltip>
+      </v-btn>
       <!-- <v-divider vertical inset></v-divider>
       <v-btn class="mx-1" icon="mdi-cog"></v-btn> -->
     </v-app-bar>
@@ -51,6 +55,8 @@
       </v-card>
       <v-empty-state v-else headline="Whoops, 404" title="Page not found"
         text="The page you were looking for does not exist" icon="mdi mdi-console"></v-empty-state>
+
+      <SshQuickAccessDialog v-model="data.sshQuickAccessDialog" @close="data.sshQuickAccessDialog = false" />
     </v-main>
   </v-app>
 </template>
@@ -62,6 +68,7 @@ import DrawerListItem from './components/DrawerListItem.vue';
 import Ping from './components/Ping.vue';
 import { getInfo, getSshSessions } from './services/api';
 import { useTerminalsStore } from './stores/terminals';
+import SshQuickAccessDialog from './components/SshQuickAccessDialog.vue';
 
 const terminals = useTerminalsStore();
 
@@ -71,6 +78,7 @@ const data = reactive({
   drawer: null,
   info: null,
   sessions: [],
+  sshQuickAccessDialog: false
 });
 
 onMounted(() => {
@@ -100,6 +108,6 @@ const initialize = () => {
 }
 
 const connect = (item) => {
-  terminals.add(item.id, item.path, item.name || item.bin);
+  terminals.add(item.id, item.path, null, item.name || item.bin);
 }
 </script>

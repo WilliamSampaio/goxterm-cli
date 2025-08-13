@@ -3,8 +3,8 @@
 
   <div class="px-1 pt-1 pb-6 bg-black" ref="terminal" style="height: 90%;"></div>
 
-  <v-dialog v-model="data.reconnect" max-width="500" contained persistent>
-    <v-card v-if="data.message !== null" :title="data.message.title">
+  <v-dialog v-model="messageDialog" max-width="500" contained persistent>
+    <v-card v-if="data.message" :title="data.message.title">
       <template v-slot:prepend>
         <v-icon :icon="'$' + data.message.type" :color="data.message.type"></v-icon>
       </template>
@@ -12,10 +12,10 @@
         {{ data.message.text }}
       </v-card-text>
       <v-card-actions>
-        <v-btn variant="tonal" color="error" text="close" rounded
+        <v-btn class="px-5" variant="tonal" color="error" text="close" rounded
           @click="terminals.remove(terminals.current.id)"></v-btn>
         <v-spacer></v-spacer>
-        <v-btn variant="tonal" color="success" text="refresh" prepend-icon="mdi mdi-reload" rounded
+        <v-btn class="px-5" variant="tonal" color="success" text="refresh" prepend-icon="mdi mdi-reload" rounded
           @click="refresh"></v-btn>
       </v-card-actions>
     </v-card>
@@ -27,9 +27,9 @@
 </template>
 
 <script setup>
-import { shell, ssh } from '@/services/websocket';
+import { shell, ssh, sshQuickAccess } from '@/services/websocket';
 import { Terminal } from '@xterm/xterm';
-import { onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { FitAddon } from 'xterm-addon-fit';
 import { WebLinksAddon } from 'xterm-addon-web-links';
 import TerminalTopBar from './TerminalTopBar.vue';
@@ -43,8 +43,7 @@ const xTerm = ref(null);
 const ws = ref(null);
 
 const data = reactive({
-  message: null,
-  reconnect: false
+  message: null
 });
 
 const refresh = () => {
@@ -83,6 +82,20 @@ const initWebSocket = () => {
     ws.value = ssh(terminals.current.sshSessionId);
   } else if (terminals.current.shellPath) {
     ws.value = shell(terminals.current.shellPath);
+  } else if (terminals.current.sshConnection) {
+
+    const { sshConnection } = terminals.current;
+
+    if (!sshConnection || !sshConnection.connection || !sshConnection.password) {
+      data.message = {
+        title: 'Oops!...',
+        text: 'Invalid SSH Connection!',
+        type: 'error'
+      }
+      return;
+    }
+
+    ws.value = sshQuickAccess(sshConnection);
   } else {
     return;
   }
@@ -91,7 +104,6 @@ const initWebSocket = () => {
   xTerm.value.onData(data => ws.value.send(data));
 
   ws.value.onclose = event => {
-    data.reconnect = true;
     data.message = {
       title: 'Connection closed',
       text: `${event.code} (${event.type}): ${event.reason || '...'}`,
@@ -101,7 +113,6 @@ const initWebSocket = () => {
   };
 
   ws.value.onerror = error => {
-    data.reconnect = true;
     data.message = {
       title: 'Communication error',
       text: error.message || '...',
@@ -110,7 +121,7 @@ const initWebSocket = () => {
     // xTerm.value.write('\r\n\x1b[31m*** Communication error ***\x1b[0m\r\n');
   };
 
-  data.reconnect = false;
+  data.message = null;
 }
 
 const clear = () => {
@@ -146,6 +157,10 @@ watch(() => terminals.current.lock, (locked) => {
     //   ws.value.send("# UNLOCKED\r");
     // }
   }
+});
+
+const messageDialog = computed(() => {
+  return data.message !== null;
 });
 
 onMounted(() => {
