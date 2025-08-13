@@ -73,6 +73,8 @@ const initXterm = () => {
 
   fitAddon.fit();
 
+  window.addEventListener('resize', () => fitAddon.fit());
+
   // xTerm.value.write('<< WELCOME TO GOXTERM! >>\r\n');
 }
 
