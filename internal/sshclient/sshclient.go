@@ -102,16 +102,19 @@ func RequestTTY(session *ssh.Session) error {
 		ssh.TTY_OP_OSPEED: 14400,
 	}
 
-	fd := uintptr(os.Stdin.Fd())
-	width, height, err := term.GetSize(fd)
-	if err != nil {
-		// fallback for 80x24
-		width = 80
-		height = 24
-	}
+	width, height := GetSize()
 
 	if err := session.RequestPty("xterm-256color", height, width, modes); err != nil {
 		return fmt.Errorf("failed to request TTY: %v", err)
 	}
 	return nil
+}
+
+func GetSize() (width int, height int) {
+	fd := uintptr(os.Stdin.Fd())
+	width, height, err := term.GetSize(fd)
+	if err != nil {
+		return 80, 24
+	}
+	return width, height
 }

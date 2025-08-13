@@ -38,4 +38,6 @@ export const useTerminalsStore = defineStore('terminals', () => {
     remove,
     toggleLock
   }
+}, {
+  persist: true
 });
