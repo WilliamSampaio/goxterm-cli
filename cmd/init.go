@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"goxterm-cli/internal/config"
 	"goxterm-cli/internal/constants"
+	"goxterm-cli/internal/database"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,6 +15,7 @@ import (
 )
 
 var overwrite bool
+var noMigrate bool
 
 // initCmd represents the setup command
 var initCmd = &cobra.Command{
@@ -26,6 +28,7 @@ var initCmd = &cobra.Command{
 
 func init() {
 	initCmd.Flags().BoolVarP(&overwrite, "overwrite", "O", false, "Overwrite on")
+	initCmd.Flags().BoolVarP(&noMigrate, "no-migrate", "X", false, "Ignore migration")
 	rootCmd.AddCommand(initCmd)
 }
 
@@ -39,7 +42,7 @@ func Initialize() {
 
 	prompt := promptui.Select{
 		Label: "Select Store Type",
-		Items: []string{"json", "bbolt (not implemented)", "sqlite (not implemented)"},
+		Items: []string{"sqlite3", "bbolt (not implemented)"},
 	}
 
 	_, storeType, err := prompt.Run()
@@ -68,6 +71,13 @@ func Initialize() {
 	if err := config.Save(cfg); err != nil {
 		fmt.Printf("Failed to save configuration: %v\n", err)
 		os.Exit(1)
+	}
+
+	if !noMigrate {
+		if err := database.RunMigration(database.PerformDown, 0); err != nil {
+			fmt.Printf("Failed to run migrations: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	fmt.Println("Configuration saved successfully.")
