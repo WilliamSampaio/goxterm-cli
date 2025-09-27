@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"goxterm-cli/internal/api"
 	"goxterm-cli/internal/config"
+	"goxterm-cli/internal/web"
 	"goxterm-cli/internal/websocket"
 	"log"
 	"net/http"
@@ -41,6 +42,8 @@ func serve(port int) {
 	http.HandleFunc("/api/ping", api.Ping)
 	http.HandleFunc("/api/info", api.GetInfo)
 	http.HandleFunc("/api/ssh/sessions", api.GetListCredentials)
+
+	http.HandleFunc("/web", web.Index)
 
 	http.HandleFunc("/ws/ssh", websocket.SshWebSocketHandler)
 	http.HandleFunc("/ws/shell", websocket.ShellWebSocketHandler)
