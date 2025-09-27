@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoXterm</title>
+    <script src="/assets/js/xterm.js"></script>
+    <link href="/assets/css/xterm.css" rel="stylesheet">
+    <style>
+        body,
+        html {
+            /* margin: 0;
+            padding: 0; */
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #151515;
+        }
+
+        /* #terminal {
+            width: 80%;
+            height: 80%;
+        } */
+    </style>
+</head>
+
+<body>
+    <div id="terminal"></div>
+    <script>
+        const term = new Terminal({
+            cursorBlink: true,
+            fontFamily: 'monospace',
+        });
+
+        const shell = (path) => {
+            return new WebSocket(`ws://localhost:8080/ws/shell?path=${path}`);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            term.open(document.getElementById('terminal'));
+
+            const socket = shell("/usr/bin/zsh");
+
+            socket.onopen = function () {
+                term.onData(function (data) {
+                    socket.send(data);
+                });
+
+                socket.onmessage = function (event) {
+                    term.write(event.data);
+                };
+
+                socket.onclose = function () {
+                    term.write('\r\nConnection closed');
+                };
+            };
+        });
+    </script>
+</body>
+
+</html>

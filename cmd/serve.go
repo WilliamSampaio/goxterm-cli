@@ -39,6 +39,9 @@ func init() {
 func serve(port int) {
 	fmt.Println("Starting GoXterm web server...")
 
+	fs := http.FileServer(http.Dir("./assets/"))
+	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
+
 	http.HandleFunc("/api/ping", api.Ping)
 	http.HandleFunc("/api/info", api.GetInfo)
 	http.HandleFunc("/api/ssh/sessions", api.GetListCredentials)
