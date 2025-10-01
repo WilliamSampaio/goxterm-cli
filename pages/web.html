@@ -6,34 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GoXterm</title>
     <script src="/assets/js/xterm.js"></script>
+    <script src="/assets/js/xterm-addon-fit.min.js"></script>
+    <script src="/assets/js/xterm-addon-web-links.min.js"></script>
+    <script src="/assets/js/xterm-addon-attach.min.js"></script>
     <link href="/assets/css/xterm.css" rel="stylesheet">
     <style>
         body,
         html {
-            /* margin: 0;
-            padding: 0; */
-            height: 100%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             background-color: #151515;
         }
-
-        /* #terminal {
-            width: 80%;
-            height: 80%;
-        } */
     </style>
 </head>
 
 <body>
     <div id="terminal"></div>
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+
         const term = new Terminal({
+            rendererType: "canvas",
+            convertEol: true,
             cursorBlink: true,
             fontFamily: 'monospace',
         });
+
+        const fitAddon = new FitAddon.FitAddon();
+
+        term.loadAddon(new WebLinksAddon.WebLinksAddon());
+        term.loadAddon(fitAddon);
+
+        term.onResize(() => {
+            fitAddon.fit();
+        });
+
+        fitAddon.fit();
 
         const shell = (path) => {
             return new WebSocket(`ws://localhost:8080/ws/shell?path=${path}`);
@@ -41,22 +47,36 @@
 
         document.addEventListener("DOMContentLoaded", function () {
 
+            let socket = null;
+
+            if (urlParams.has('shell') && urlParams.get('shell') === 'zsh') {
+                socket = shell('/usr/bin/zsh');
+            }
+
+            if (urlParams.has('shell') && urlParams.get('shell') === 'bash') {
+                socket = shell('/usr/bin/bash');
+            }
+
+            if (urlParams.has('shell') && urlParams.get('shell') === 'sh') {
+                socket = shell('/bin/sh');
+            }
+
+            if (!socket) {
+                throw new Error('Shell not specified or unsupported. Use ?shell=zsh, ?shell=bash, or ?shell=sh in the URL.');
+            }
+
+            const attachAddon = new AttachAddon.AttachAddon(socket);
+
             term.open(document.getElementById('terminal'));
 
-            const socket = shell("/usr/bin/zsh");
+            term.loadAddon(attachAddon);
 
-            socket.onopen = function () {
-                term.onData(function (data) {
-                    socket.send(data);
-                });
+            socket.onclose = function () {
+                term.write('\r\nConnection closed');
+            };
 
-                socket.onmessage = function (event) {
-                    term.write(event.data);
-                };
-
-                socket.onclose = function () {
-                    term.write('\r\nConnection closed');
-                };
+            socket.onerror = function (error) {
+                term.write(`\r\nError: ${error.message}`);
             };
         });
     </script>
