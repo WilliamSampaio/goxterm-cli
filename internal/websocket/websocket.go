@@ -106,11 +106,11 @@ func ShellWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	cmd := exec.Command(path)
 
-	width, height := sshclient.GetSize()
+	// width, height := sshclient.GetSize()
 
 	ptmx, err := pty.StartWithSize(cmd, &pty.Winsize{
-		Rows: uint16(height),
-		Cols: uint16(width),
+		Rows: uint16(40),
+		Cols: uint16(120),
 	})
 	if err != nil {
 		log.Println("Erro ao iniciar PTY:", err)

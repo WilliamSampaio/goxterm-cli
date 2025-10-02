@@ -21,25 +21,34 @@
 <body>
     <div id="terminal"></div>
     <script>
+        const termSize = {
+            cols: 120,
+            rows: 40
+        };
+
         const urlParams = new URLSearchParams(window.location.search);
 
         const term = new Terminal({
-            rendererType: "canvas",
+            cols: termSize.cols,
+            rows: termSize.rows,
+            scrollback: 5000,
             convertEol: true,
             cursorBlink: true,
-            fontFamily: 'monospace',
+            wordWrap: true,
+            rendererType: "canvas",
+            fontFamily: "monospace",
         });
-
-        const fitAddon = new FitAddon.FitAddon();
 
         term.loadAddon(new WebLinksAddon.WebLinksAddon());
-        term.loadAddon(fitAddon);
 
-        term.onResize(() => {
-            fitAddon.fit();
-        });
+        // const fitAddon = new FitAddon.FitAddon();
+        // term.loadAddon(fitAddon);
 
-        fitAddon.fit();
+        // term.onResize(() => {
+        //     fitAddon.fit();
+        // });
+
+        // fitAddon.fit();
 
         const shell = (path) => {
             return new WebSocket(`ws://localhost:8080/ws/shell?path=${path}`);
