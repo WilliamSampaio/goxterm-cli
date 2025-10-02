@@ -19,6 +19,9 @@
 </head>
 
 <body>
+    <div style="margin-bottom: 10px;">
+        <button id="btnClear">Clear</button>
+    </div>
     <div id="terminal"></div>
     <script>
         const termSize = {
@@ -87,6 +90,11 @@
             socket.onerror = function (error) {
                 term.write(`\r\nError: ${error.message}`);
             };
+
+            document.getElementById('btnClear').addEventListener('click', function () {
+                term.clear();
+                term.focus();
+            });
         });
     </script>
 </body>
