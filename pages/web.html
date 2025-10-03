@@ -20,7 +20,9 @@
 
 <body>
     <div style="margin-bottom: 10px;">
+        <button id="btnLock">Lock</button>
         <button id="btnClear">Clear</button>
+        <button id="btnExit">Exit</button>
     </div>
     <div id="terminal"></div>
     <script>
@@ -91,9 +93,31 @@
                 term.write(`\r\nError: ${error.message}`);
             };
 
+            document.getElementById('btnLock').addEventListener('click', function () {
+                if (!term.options.disableStdin) {
+                    term.options.disableStdin = true;
+                    term.options.cursorBlink = false;
+                    term.blur();
+                    this.textContent = 'Unlock';
+                } else {
+                    term.options.disableStdin = false;
+                    term.options.cursorBlink = true;
+                    term.focus();
+                    this.textContent = 'Lock';
+                }
+            });
+
             document.getElementById('btnClear').addEventListener('click', function () {
                 term.clear();
                 term.focus();
+            });
+
+            document.getElementById('btnExit').addEventListener('click', function () {
+                if (confirm("Exit now?")) {
+                    socket.send('exit\r');
+                    if (socket) socket.close();
+                    // term.dispose();
+                }
             });
         });
     </script>
