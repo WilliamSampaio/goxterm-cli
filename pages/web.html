@@ -9,11 +9,65 @@
     <script src="/assets/js/xterm-addon-fit.min.js"></script>
     <script src="/assets/js/xterm-addon-web-links.min.js"></script>
     <script src="/assets/js/xterm-addon-attach.min.js"></script>
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
     <link href="/assets/css/xterm.css" rel="stylesheet">
     <style>
         body,
         html {
             background-color: #151515;
+        }
+
+        .xterm-viewport::-webkit-scrollbar {
+            display: none;
+        }
+
+        #terminal-wrapper {
+            box-sizing: border-box;
+        }
+
+        #terminal-wrapper.crt_theme {
+            position: relative;
+            /* width: 100%; */
+            /* height: 100%; */
+            background: rgba(10, 10, 10, 1);
+            padding: 2rem;
+            border: 2px dotted greenyellow;
+        }
+
+        #terminal-wrapper.crt_theme span {
+            color: greenyellow !important;
+        }
+
+        #terminal-wrapper.crt_theme::selection {
+            background-color: rgba(0, 250, 0, 0.3);
+            color: rgba(0, 50, 0, 1);
+        }
+
+        #terminal-wrapper.crt_theme .scanlines {
+            pointer-events: none;
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0),
+                    rgba(255, 255, 255, 0) 50%,
+                    rgba(0, 0, 0, 0.2) 70%,
+                    rgba(0, 0, 0, 0.6));
+            background-size: 100% 0.3rem;
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+        }
+
+        #terminal-wrapper.crt_theme .glow {
+            pointer-events: none;
+            background: radial-gradient(circle at center,
+                    rgba(27, 212, 89, 1) 0%,
+                    rgba(27, 212, 89, 0.88) 58%,
+                    rgba(21, 235, 92, 0.57) 80%,
+                    rgba(19, 94, 29, 0.27) 93%,
+                    rgba(10, 23, 12, 0) 100%);
+            opacity: 0.15;
+            position: absolute;
+            inset: 0;
+            z-index: 1;
         }
     </style>
 </head>
@@ -23,8 +77,16 @@
         <button id="btnLock">Lock</button>
         <button id="btnClear">Clear</button>
         <button id="btnExit">Exit</button>
+        <select id="selectTheme">
+            <option value="default">Default</option>
+            <option value="crt_theme">Old CRT</option>
+        </select>
     </div>
-    <div id="terminal"></div>
+    <div id="terminal-wrapper" style="display:none;">
+        <div id="terminal"></div>
+        <div class="scanlines"></div>
+        <div class="glow"></div>
+    </div>
     <script>
         const termSize = {
             cols: 120,
@@ -32,6 +94,31 @@
         };
 
         const urlParams = new URLSearchParams(window.location.search);
+
+        const themes = {
+            default: {},
+            crt_theme: {
+                background: '#0a0a0a',
+                foreground: '#00fa00',
+                cursor: '#00fa00',
+                black: '#000000',
+                red: '#ff0000',
+                green: '#00fa00',
+                yellow: '#adff2f',
+                blue: '#0000ff',
+                magenta: '#ff00ff',
+                cyan: '#00ffff',
+                white: '#f5f5f5',
+                brightBlack: '#555555',
+                brightRed: '#ff5555',
+                brightGreen: '#55ff55',
+                brightYellow: '#ffff55',
+                brightBlue: '#5555ff',
+                brightMagenta: '#ff55ff',
+                brightCyan: '#55ffff',
+                brightWhite: '#ffffff'
+            }
+        };
 
         const term = new Terminal({
             cols: termSize.cols,
@@ -41,7 +128,7 @@
             cursorBlink: true,
             wordWrap: true,
             rendererType: "canvas",
-            fontFamily: "monospace",
+            fontFamily: "monospace"
         });
 
         term.loadAddon(new WebLinksAddon.WebLinksAddon());
@@ -59,7 +146,26 @@
             return new WebSocket(`ws://localhost:8080/ws/shell?path=${path}`);
         }
 
+        const setTheme = (theme) => {
+            if (!themes[theme]) return;
+
+            const themeFromLocalStorage = localStorage.getItem("goxteerm-theme");
+
+            if (!themeFromLocalStorage) localStorage.setItem("goxteerm-theme", theme);
+
+            if (theme !== themeFromLocalStorage) localStorage.setItem("goxteerm-theme", theme);
+
+            term.options.theme = themes[theme];
+            if (theme === 'default') {
+                window._terminalWrapper.classList.remove(themeFromLocalStorage);
+            } else {
+                window._terminalWrapper.classList.add(theme);
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
+
+            window._terminalWrapper = document.getElementById('terminal-wrapper');
 
             let socket = null;
 
@@ -119,6 +225,19 @@
                     // term.dispose();
                 }
             });
+
+            const selectTheme = document.getElementById('selectTheme')
+
+            selectTheme.addEventListener('change', function (e) {
+                setTheme(e.target.value);
+                // term.focus();
+            });
+
+            selectTheme.value = localStorage.getItem("goxteerm-theme") || 'default';
+            setTheme(selectTheme.value);
+
+            $("#terminal-wrapper").fadeIn(3);
+            term.focus();
         });
     </script>
 </body>
