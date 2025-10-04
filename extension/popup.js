@@ -131,6 +131,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         await saveOnStorage("connections", connections);
+
+        inputAlias.readOnly = true;
+
         notify("GoXterm Extension", "Connection saved successfully.");
     });
 
