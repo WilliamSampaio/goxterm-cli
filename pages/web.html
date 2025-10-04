@@ -97,6 +97,10 @@
             return new WebSocket(`ws://localhost:8080/ws/shell?path=${path}`);
         }
 
+        const ssh = (host, port, user, password) => {
+            return new WebSocket(`ws://localhost:8080/ws/ssh?host=${host}&port=${port}&user=${user}&password=${password}`);
+        }
+
         const setTheme = (theme) => {
             if (!themes[theme]) return;
 
@@ -119,6 +123,20 @@
             window._terminalWrapper = document.getElementById('terminal-wrapper');
 
             let socket = null;
+
+            if (urlParams.has('ssh') && urlParams.get('ssh') === 'true') {
+                const host = urlParams.get('host');
+                const port = urlParams.get('port');
+                const user = urlParams.get('user');
+
+                if (!host || !port || !user) {
+                    alert('Missing SSH parameters. Please provide host, port, and user in the URL.');
+                    throw new Error('Missing SSH parameters. Please provide host, port, and user in the URL.');
+                }
+
+                const password = urlParams.get('password');
+                socket = ssh(host, port, user, password);
+            }
 
             if (urlParams.has('shell') && urlParams.get('shell') === 'zsh') {
                 socket = shell('/usr/bin/zsh');

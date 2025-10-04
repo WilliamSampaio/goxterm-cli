@@ -1,17 +1,13 @@
 package websocket
 
 import (
-	"fmt"
-	"goxterm-cli/internal/config"
 	"goxterm-cli/internal/sshclient"
 	"goxterm-cli/internal/store"
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os/exec"
 	"strconv"
-	"strings"
 
 	"github.com/creack/pty"
 	"github.com/gorilla/websocket"
@@ -25,13 +21,29 @@ var upgrader = websocket.Upgrader{
 
 func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
-	credential, err := getCredential(r.URL.Query())
+	host := r.URL.Query().Get("host")
+
+	port, err := strconv.Atoi(r.URL.Query().Get("port"))
 	if err != nil {
-		log.Println("Error get credential:", err)
+		log.Println("Error get port:", err)
 		return
 	}
 
-	log.Printf("WebSocket connection request for: %s@%s:%d\n", credential.User, credential.Host, credential.Port)
+	user := r.URL.Query().Get("user")
+
+	password := r.URL.Query().Get("password")
+
+	credential := store.SshSession{
+		Session: store.Session{
+			Name: "",
+		},
+		Host:     host,
+		Port:     port,
+		User:     user,
+		Password: password,
+	}
+
+	log.Printf("WebSocket connection request for: %s@%s:%d\n", user, host, port)
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -40,7 +52,7 @@ func SshWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 
-	client, err := sshclient.ConnectSSH(*credential)
+	client, err := sshclient.ConnectSSH(credential)
 	if err != nil {
 		log.Println("SSH dial error:", err)
 		http.Error(w, "SSH connection error", http.StatusInternalServerError)
@@ -145,83 +157,83 @@ func (w *wsWriter) Write(p []byte) (int, error) {
 	return len(p), err
 }
 
-func getCredential(values url.Values) (*store.SshSession, error) {
-	id := values.Get("id")
-	connection := values.Get("connection")
-	password := values.Get("password")
+// func getCredential(values url.Values) (*store.SshSession, error) {
+// 	id := values.Get("id")
+// 	connection := values.Get("connection")
+// 	password := values.Get("password")
 
-	if id != "" {
-		return getCredentialById(id)
-	}
+// 	if id != "" {
+// 		return getCredentialById(id)
+// 	}
 
-	if connection != "" && password != "" {
-		return getCredentialBySshConnection(connection, password)
-	}
+// 	if connection != "" && password != "" {
+// 		return getCredentialBySshConnection(connection, password)
+// 	}
 
-	return nil, fmt.Errorf("no credentials found")
-}
+// 	return nil, fmt.Errorf("no credentials found")
+// }
 
-func getCredentialById(idStr string) (*store.SshSession, error) {
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return nil, err
-	}
+// func getCredentialById(idStr string) (*store.SshSession, error) {
+// 	id, err := strconv.Atoi(idStr)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	cfg, err := config.Load()
-	if err != nil {
-		return nil, err
-	}
+// 	cfg, err := config.Load()
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	if !store.Exists(cfg.StorePath) {
-		return nil, err
-	}
+// 	if !store.Exists(cfg.StorePath) {
+// 		return nil, err
+// 	}
 
-	db, err := store.Load(cfg.StorePath)
-	if err != nil {
-		return nil, err
-	}
+// 	db, err := store.Load(cfg.StorePath)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	credential, err := db.GetSshSession(id)
-	if err != nil {
-		return nil, err
-	}
+// 	credential, err := db.GetSshSession(id)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return credential, nil
-}
+// 	return credential, nil
+// }
 
-func getCredentialBySshConnection(connection string, password string) (*store.SshSession, error) {
-	split1 := strings.Split(connection, "@")
-	if len(split1) != 2 || split1[0] == "" || split1[1] == "" {
-		return nil, fmt.Errorf("invalid connection string format. use 'user@host:port'")
-	}
+// func getCredentialBySshConnection(connection string, password string) (*store.SshSession, error) {
+// 	split1 := strings.Split(connection, "@")
+// 	if len(split1) != 2 || split1[0] == "" || split1[1] == "" {
+// 		return nil, fmt.Errorf("invalid connection string format. use 'user@host:port'")
+// 	}
 
-	user := split1[0]
-	host := ""
-	port := 22
+// 	user := split1[0]
+// 	host := ""
+// 	port := 22
 
-	split2 := strings.Split(split1[1], ":")
+// 	split2 := strings.Split(split1[1], ":")
 
-	if len(split2) == 2 {
+// 	if len(split2) == 2 {
 
-		p, err := strconv.Atoi(split2[1])
-		if err != nil {
-			return nil, fmt.Errorf("invalid port number: %s", split2[1])
-		}
+// 		p, err := strconv.Atoi(split2[1])
+// 		if err != nil {
+// 			return nil, fmt.Errorf("invalid port number: %s", split2[1])
+// 		}
 
-		port = p
-	}
+// 		port = p
+// 	}
 
-	host = split2[0]
+// 	host = split2[0]
 
-	credential := store.SshSession{
-		Session: store.Session{
-			Name: "",
-		},
-		Host:     host,
-		Port:     port,
-		User:     user,
-		Password: password,
-	}
+// 	credential := store.SshSession{
+// 		Session: store.Session{
+// 			Name: "",
+// 		},
+// 		Host:     host,
+// 		Port:     port,
+// 		User:     user,
+// 		Password: password,
+// 	}
 
-	return &credential, nil
-}
+// 	return &credential, nil
+// }
