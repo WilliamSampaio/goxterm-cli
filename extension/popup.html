@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goxterm Extension</title>
+</head>
+
+<body>
+    <div style="display: flex;">
+        <b>GoXterm Extension</b>
+        <a href="/settings.html" style="margin-left: auto;">Settings</a>
+    </div>
+    <hr>
+    <div>
+        <b style="text-align: center;">SSH</b>
+        <br>
+        <div>
+            <label for="inputAlias">Alias:</label>
+            <input id="inputAlias" name="alias" type="text">
+        </div>
+        <div>
+            <label for="inputHost">Host:</label>
+            <input id="inputHost" name="host" type="text" placeholder="">
+        </div>
+        <div>
+            <label for="inputPort">Port:</label>
+            <input id="inputPort" name="port" type="text" placeholder="22">
+        </div>
+        <div>
+            <label for="inputUser">User:</label>
+            <input id="inputUser" name="user" type="text" placeholder="root">
+        </div>
+        <div>
+            <label for="inputPassword">Password:</label>
+            <input id="inputPassword" name="password" type="password">
+        </div>
+        <br>
+        <div style="display: flex;">
+            <button id="btnConnectSSH">Connect</button>
+            <button style="margin-left: auto;" id="btnSaveConnection">Save</button>
+            <button style="margin-left: auto;" id="btnDeleteConnection">Delete</button>
+        </div>
+    </div>
+    <hr>
+    <div>
+        <b style="text-align: center;">Shells</b>
+        <br>
+        <form style="display: flex;" id="selectShell" action="http://localhost:8080/web" target="_blank" method="get">
+            <button name="shell" value="zsh" type="submit">ZSH</button>
+            <button style="margin-left: auto;" name="shell" value="bash" type="submit">Bash</button>
+            <button style="margin-left: auto;" name="shell" value="sh" type="submit">SH</button>
+        </form>
+</body>
+
+</html>

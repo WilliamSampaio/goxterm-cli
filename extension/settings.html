@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goxterm Extension</title>
+</head>
+
+<body>
+    <div style="display: flex;">
+        <b>GoXterm Extension</b>
+        <a href="/popup.html" style="margin-left: auto;">Back</a>
+    </div>
+    <hr>
+    <div>
+        <b style="text-align: center;">Settings</b>
+        <br>
+        <div>
+            <label for="inputBackend">GoXterm Backend URL:</label>
+            <input id="inputBackend" name="backend" type="text" placeholder="http://localhost:8080">
+        </div>
+        <hr>
+        <div>
+            <label for="inputDefaultPort">SSH Default Port:</label>
+            <input id="inputDefaultPort" name="port" type="text" placeholder="22">
+        </div>
+        <div>
+            <label for="inputDefaultUser">SSH Default User:</label>
+            <input id="inputDefaultUser" name="user" type="text" placeholder="root">
+        </div>
+        <div>
+            <label for="inputDefaultPassword">SSH Default Password:</label>
+            <input id="inputDefaultPassword" name="password" type="password">
+        </div>
+        <br>
+        <div style="display: flex;">
+            <button style="margin-left: auto;" id="btnSaveSettings">Save</button>
+        </div>
+    </div>
+</body>
+
+</html>
