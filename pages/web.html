@@ -9,22 +9,35 @@
     <script src="/assets/js/xterm-addon-fit.min.js"></script>
     <script src="/assets/js/xterm-addon-web-links.min.js"></script>
     <script src="/assets/js/xterm-addon-attach.min.js"></script>
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
     <link href="/assets/css/xterm.css" rel="stylesheet">
-    <style>
-        body,
-        html {
-            background-color: #151515;
-        }
-    </style>
+    <link href="/assets/css/base.css" rel="stylesheet">
+    <link href="/assets/css/crt_theme.css" rel="stylesheet">
 </head>
 
 <body>
-    <div style="margin-bottom: 10px;">
-        <button id="btnLock">Lock</button>
-        <button id="btnClear">Clear</button>
-        <button id="btnExit">Exit</button>
+    <div style="margin-bottom: 10px;display: flex;">
+        <div style="display: flex;">
+            <button id="btnLock">Lock</button>
+            <button id="btnClear">Clear</button>
+        </div>
+        <div style="display: flex;margin-left: auto;">
+            <div>
+                <label for="selectTheme">Theme:</label>
+                <select id="selectTheme">
+                    <option value="default">Default</option>
+                    <option value="crt_theme">Old CRT</option>
+                </select>
+            </div>
+            <hr style="margin: 0;margin-left: 5px;margin-right: 5px;">
+            <button id="btnExit">Exit</button>
+        </div>
     </div>
-    <div id="terminal"></div>
+    <div id="terminal-wrapper" style="display:none;">
+        <div id="terminal"></div>
+        <div class="scanlines"></div>
+        <div class="glow"></div>
+    </div>
     <script>
         const termSize = {
             cols: 120,
@@ -32,6 +45,31 @@
         };
 
         const urlParams = new URLSearchParams(window.location.search);
+
+        const themes = {
+            default: {},
+            crt_theme: {
+                background: '#0a0a0a',
+                foreground: '#00fa00',
+                cursor: '#00fa00',
+                black: '#000000',
+                red: '#ff0000',
+                green: '#00fa00',
+                yellow: '#adff2f',
+                blue: '#0000ff',
+                magenta: '#ff00ff',
+                cyan: '#00ffff',
+                white: '#f5f5f5',
+                brightBlack: '#555555',
+                brightRed: '#ff5555',
+                brightGreen: '#55ff55',
+                brightYellow: '#ffff55',
+                brightBlue: '#5555ff',
+                brightMagenta: '#ff55ff',
+                brightCyan: '#55ffff',
+                brightWhite: '#ffffff'
+            }
+        };
 
         const term = new Terminal({
             cols: termSize.cols,
@@ -41,7 +79,7 @@
             cursorBlink: true,
             wordWrap: true,
             rendererType: "canvas",
-            fontFamily: "monospace",
+            fontFamily: "monospace"
         });
 
         term.loadAddon(new WebLinksAddon.WebLinksAddon());
@@ -59,7 +97,26 @@
             return new WebSocket(`ws://localhost:8080/ws/shell?path=${path}`);
         }
 
+        const setTheme = (theme) => {
+            if (!themes[theme]) return;
+
+            const themeFromLocalStorage = localStorage.getItem("goxteerm-theme");
+
+            if (!themeFromLocalStorage) localStorage.setItem("goxteerm-theme", theme);
+
+            if (theme !== themeFromLocalStorage) localStorage.setItem("goxteerm-theme", theme);
+
+            term.options.theme = themes[theme];
+            if (theme === 'default') {
+                window._terminalWrapper.classList.remove(themeFromLocalStorage);
+            } else {
+                window._terminalWrapper.classList.add(theme);
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
+
+            window._terminalWrapper = document.getElementById('terminal-wrapper');
 
             let socket = null;
 
@@ -119,6 +176,19 @@
                     // term.dispose();
                 }
             });
+
+            const selectTheme = document.getElementById('selectTheme')
+
+            selectTheme.addEventListener('change', function (e) {
+                setTheme(e.target.value);
+                // term.focus();
+            });
+
+            selectTheme.value = localStorage.getItem("goxteerm-theme") || 'default';
+            setTheme(selectTheme.value);
+
+            $("#terminal-wrapper").fadeIn(3);
+            term.focus();
         });
     </script>
 </body>
