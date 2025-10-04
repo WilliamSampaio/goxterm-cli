@@ -1,0 +1,14 @@
+body,
+html {
+    background-color: #151515;
+    color: aqua;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.xterm-viewport::-webkit-scrollbar {
+    display: none;
+}
+
+#terminal-wrapper {
+    box-sizing: border-box;
+}
