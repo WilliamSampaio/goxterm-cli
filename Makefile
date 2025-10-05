@@ -4,7 +4,9 @@ MAIN_FILE=main.go
 BUILD_FLAGS=
 
 BIN_INSTALL_DIR = /usr/local/bin
-WEBAPP_INSTALL_DIR = /usr/local/share
+# WEBAPP_INSTALL_DIR = /usr/local/share
+
+ZIP ?= zip
 
 OS=$(shell uname -s)
 
@@ -31,6 +33,14 @@ else
 # 	@echo "🔧 Building webapp..."
 # 	@cd webapp && npm install && npx vite build && cp -R dist ../$(DIST_DIR)
 endif
+	@command -v $(ZIP) > /dev/null 2>&1 || { \
+		echo "❌ O comando '${ZIP}' não está instalado. Por favor, instale-o e tente novamente."; \
+		exit 1; \
+	}
+	@echo "📦 Packaging Chrome extension..."
+	@cd extension && zip -r ../$(DIST_DIR)/$(APP_NAME)-extension-chrome.zip .
+# 	@echo "📦 Packaging Firefox extension..."
+# 	@cd extension && zip -r ../$(DIST_DIR)/$(APP_NAME)-extension-firefox.xpi .
 	@echo "✅ Build complete: ./$(DIST_DIR)"
 
 install: build
