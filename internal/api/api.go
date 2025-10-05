@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -76,17 +77,22 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 		Version: constants.AppVersion,
 	}
 
-	defaultShell := os.Getenv("SHELL")
+	DefaultPath := os.Getenv("SHELL")
 
-	shells := []string{"bash", "zsh"}
+	parts := strings.Split(DefaultPath, "/")
 
-	for _, bin := range shells {
+	DefaultBin := parts[len(parts)-1]
+
+	info.Shells = append(info.Shells, Shell{Bin: DefaultBin, Path: DefaultPath, Default: true})
+
+	bins := []string{"bash", "zsh", "sh"}
+
+	for _, bin := range bins {
+		if bin == DefaultBin {
+			continue
+		}
 		if path, err := exec.LookPath(bin); err == nil {
-			isDefault := false
-			if (defaultShell != "") && (defaultShell == path) {
-				isDefault = true
-			}
-			info.Shells = append(info.Shells, Shell{Bin: bin, Path: path, Default: isDefault})
+			info.Shells = append(info.Shells, Shell{Bin: bin, Path: path, Default: false})
 		}
 	}
 

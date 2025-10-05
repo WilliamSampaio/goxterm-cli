@@ -45,6 +45,43 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    fetch(`${config.backend_url}/api/info`)
+        .then(response => {
+            if (!response.ok) {
+                notify("Error! | GoXterm Extension", `HTTP error! status: ${response.status}.`);
+                throw new Error(`HTTP error! status: ${response.status}.`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            data.shells.forEach(s => {
+                if (!s.default) return;
+
+                const button = document.createElement('button');
+                button.style.value = 'margin-bottom: 2px;';
+                button.name = 'path';
+                button.value = s.path;
+                button.textContent = s.bin + ' (default)';
+
+                formSelectShell.append(button);
+            });
+            data.shells.forEach(s => {
+                if (s.default) return;
+
+                const button = document.createElement('button');
+                button.style.value = 'margin-bottom: 2px;';
+                button.name = 'path';
+                button.value = s.path;
+                button.textContent = s.bin;
+
+                formSelectShell.append(button);
+            });
+        })
+        .catch(error => {
+            notify("Error! | GoXterm Extension", "Error fetching API data");
+            console.error('Error fetching API data:', error);
+        });
+
     formSelectShell.action = (config && config.backend_url) ? `${config.backend_url}/web` : '';
 
     btnConnectSSH.addEventListener("click", () => {

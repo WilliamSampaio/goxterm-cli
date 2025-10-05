@@ -138,16 +138,9 @@
                 socket = ssh(host, port, user, password);
             }
 
-            if (urlParams.has('shell') && urlParams.get('shell') === 'zsh') {
-                socket = shell('/usr/bin/zsh');
-            }
-
-            if (urlParams.has('shell') && urlParams.get('shell') === 'bash') {
-                socket = shell('/usr/bin/bash');
-            }
-
-            if (urlParams.has('shell') && urlParams.get('shell') === 'sh') {
-                socket = shell('/bin/sh');
+            if (urlParams.has('shell') && urlParams.get('shell') === 'true') {
+                const path = urlParams.get('path') || '/bin/bash';
+                socket = shell(path);
             }
 
             if (!socket) {

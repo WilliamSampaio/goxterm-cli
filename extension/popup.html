@@ -47,10 +47,8 @@
     <div>
         <b style="text-align: center;">Shells</b>
         <br>
-        <form style="display: flex;" id="formSelectShell" target="_blank" method="get">
-            <button name="shell" value="zsh" type="submit">ZSH</button>
-            <button style="margin-left: auto;" name="shell" value="bash" type="submit">Bash</button>
-            <button style="margin-left: auto;" name="shell" value="sh" type="submit">SH</button>
+        <form style="display: flex;flex-direction: column;" id="formSelectShell" target="_blank" method="get">
+            <input type="hidden" name="shell" value="true">
         </form>
     </div>
 
