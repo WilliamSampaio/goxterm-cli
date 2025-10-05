@@ -32,7 +32,7 @@ function notify(title, message) {
 }
 
 async function getCurrentTabHost() {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
 
     if (!tab || !tab.url) return "0.0.0.0";
 

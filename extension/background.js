@@ -7,14 +7,14 @@ const defaultConfig = {
     ssh_default_password: null
 };
 
-chrome.runtime.onInstalled.addListener(async (details) => {
+browser.runtime.onInstalled.addListener(async (details) => {
     if (details.reason === "install") {
         console.log("Install!");
-        await chrome.storage.local.set({ config: defaultConfig });
+        await browser.storage.local.set({ config: defaultConfig });
     } else if (details.reason === "update") {
         console.log("Update!");
-        const stored = await chrome.storage.local.get("config");
+        const stored = await browser.storage.local.get("config");
         const newConfig = { ...defaultConfig, ...stored.config };
-        await chrome.storage.local.set({ config: newConfig });
+        await browser.storage.local.set({ config: newConfig });
     }
 });
