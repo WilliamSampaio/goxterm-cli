@@ -1,3 +1,4 @@
+const backendStatus = document.getElementById('backendStatus');
 const inputAlias = document.getElementById('inputAlias');
 const inputHost = document.getElementById('inputHost');
 const inputPort = document.getElementById('inputPort');
@@ -46,30 +47,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     fetch(`${config.backend_url}/api/info`)
-        .then(response => {
+        .then(async response => {
             if (!response.ok) {
-                notify("Error! | GoXterm Extension", `HTTP error! status: ${response.status}.`);
                 throw new Error(`HTTP error! status: ${response.status}.`);
             }
-            return response.json();
-        })
-        .then(data => {
-            data.shells.forEach(s => {
+            const { shells } = await response.json();
+
+            shells.forEach(s => {
                 if (!s.default) return;
 
                 const button = document.createElement('button');
-                button.style.value = 'margin-bottom: 2px;';
+                button.style.marginBottom = '2px';
                 button.name = 'path';
                 button.value = s.path;
                 button.textContent = s.bin + ' (default)';
 
                 formSelectShell.append(button);
             });
-            data.shells.forEach(s => {
+
+            shells.forEach(s => {
                 if (s.default) return;
 
                 const button = document.createElement('button');
-                button.style.value = 'margin-bottom: 2px;';
+                button.style.marginBottom = '2px';
                 button.name = 'path';
                 button.value = s.path;
                 button.textContent = s.bin;
@@ -78,9 +78,49 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         })
         .catch(error => {
-            notify("Error! | GoXterm Extension", "Error fetching API data");
             console.error('Error fetching API data:', error);
         });
+
+    const setBackendStatus = (online = true) => {
+        const inputs = document.querySelectorAll('input');
+        const buttons = document.querySelectorAll('button');
+        if (online) {
+            backendStatus.textContent = "Online";
+            backendStatus.style.color = "green";
+            inputs.forEach(input => input.disabled = false);
+            buttons.forEach(input => input.disabled = false);
+        } else {
+            backendStatus.textContent = "Offline";
+            backendStatus.style.color = "red";
+            inputs.forEach(input => input.disabled = true);
+            buttons.forEach(input => input.disabled = true);
+        }
+    }
+
+    const backendIsOnline = async () => {
+        return fetch(`${config.backend_url}/api/ping`)
+            .then(async response => {
+                if (!response.ok) {
+                    setBackendStatus(false);
+                    throw new Error(`HTTP error! status: ${response.status}.`);
+                }
+
+                const { alive } = await response.json();
+
+                if (alive === true) {
+                    setBackendStatus(true);
+                } else {
+                    setBackendStatus(false);
+                }
+            })
+            .catch(error => {
+                setBackendStatus(false);
+                console.error('Error fetching API data:', error);
+            });
+    }
+
+    backendIsOnline();
+    setInterval(backendIsOnline, 2000);
 
     formSelectShell.action = (config && config.backend_url) ? `${config.backend_url}/web` : '';
 
