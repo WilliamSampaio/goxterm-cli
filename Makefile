@@ -4,6 +4,7 @@ MAIN_FILE=main.go
 BUILD_FLAGS=
 
 BIN_INSTALL_DIR = /usr/local/bin
+FILES_INSTALL_DIR = /usr/local/share
 # WEBAPP_INSTALL_DIR = /usr/local/share
 
 ZIP ?= zip
@@ -46,6 +47,10 @@ endif
 install: build
 	@echo "📦 Installing $(APP_NAME) in $(BIN_INSTALL_DIR)..."
 	@sudo install -Dm 0755 $(DIST_DIR)/$(APP_NAME) $(BIN_INSTALL_DIR)/$(APP_NAME)
+	@echo "📦 Installing $(APP_NAME) in $(FILES_INSTALL_DIR)..."
+	@sudo mkdir -p $(FILES_INSTALL_DIR)/$(APP_NAME)
+	@sudo cp -r assets $(FILES_INSTALL_DIR)/$(APP_NAME)/
+	@sudo cp -r pages $(FILES_INSTALL_DIR)/$(APP_NAME)/
 # 	@echo "📦 Installing $(APP_NAME) in $(WEBAPP_INSTALL_DIR)..."
 # 	@sudo mkdir -p $(WEBAPP_INSTALL_DIR)/$(APP_NAME)
 # 	@sudo cp -r $(DIST_DIR)/dist/* $(WEBAPP_INSTALL_DIR)/$(APP_NAME)/
