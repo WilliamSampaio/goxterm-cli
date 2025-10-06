@@ -1,6 +1,6 @@
 {
     "name": "Goxterm Extension",
-    "description": "A terminal emulator extension for VSCode",
+    "description": "A terminal emulator extension",
     "version": "1.0",
     "manifest_version": 3,
     "background": {
