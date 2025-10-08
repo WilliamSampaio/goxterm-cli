@@ -2,9 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"goxterm-cli/internal/config"
 	"goxterm-cli/internal/constants"
-	"goxterm-cli/internal/store"
 	"log"
 	"net/http"
 	"os"
@@ -98,38 +96,6 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(info); err != nil {
-		http.Error(w, "Error encoding response", http.StatusInternalServerError)
-		return
-	}
-}
-
-func GetListCredentials(w http.ResponseWriter, r *http.Request) {
-	headers(w)
-
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	cfg, err := config.Load()
-	if err != nil {
-		http.Error(w, "Error loading configuration", http.StatusInternalServerError)
-		return
-	}
-
-	if !store.Exists(cfg.StorePath) {
-		http.Error(w, "Store does not exist or is not located", http.StatusNotFound)
-		return
-	}
-
-	db, err := store.Load(cfg.StorePath)
-	if err != nil {
-		http.Error(w, "Error loading store", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(db.SshSessions); err != nil {
 		http.Error(w, "Error encoding response", http.StatusInternalServerError)
 		return
 	}
