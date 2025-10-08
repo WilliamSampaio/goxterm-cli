@@ -43,7 +43,18 @@
     <div>
         <b>Backup/Restore</b>
     </div>
-    <div></div>
+    <div>
+        <button id="btnSaveBackup" style="width: -webkit-fill-available;">Save Backup</button>
+    </div>
+    <div>
+        <form id="formRestoreBackup">
+            <div>
+                <label for="inputRestoreFile">Restore backup:</label>
+                <input id="inputRestoreFile" name="restore" type="file" accept=".json" required>
+            </div>
+            <button type="submit" style="width: -webkit-fill-available;">Restore Backup</button>
+        </form>
+    </div>
     <hr>
     <div>
         <a href="about.html" style="margin-left: auto;"><b style="text-align: center;display: block;">About</b></a>
