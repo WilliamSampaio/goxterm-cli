@@ -16,7 +16,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Start the GoXterm web server",

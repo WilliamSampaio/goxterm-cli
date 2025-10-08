@@ -5,7 +5,6 @@ import (
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	// Define headers para HTML
 	headers(w)
 
 	http.ServeFile(w, r, "./pages/web.html")

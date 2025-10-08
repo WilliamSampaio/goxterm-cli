@@ -118,8 +118,6 @@ func ShellWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	cmd := exec.Command(path)
 
-	// width, height := sshclient.GetSize()
-
 	ptmx, err := pty.StartWithSize(cmd, &pty.Winsize{
 		Rows: uint16(40),
 		Cols: uint16(120),
@@ -156,84 +154,3 @@ func (w *wsWriter) Write(p []byte) (int, error) {
 	err := w.ws.WriteMessage(websocket.TextMessage, p)
 	return len(p), err
 }
-
-// func getCredential(values url.Values) (*store.SshSession, error) {
-// 	id := values.Get("id")
-// 	connection := values.Get("connection")
-// 	password := values.Get("password")
-
-// 	if id != "" {
-// 		return getCredentialById(id)
-// 	}
-
-// 	if connection != "" && password != "" {
-// 		return getCredentialBySshConnection(connection, password)
-// 	}
-
-// 	return nil, fmt.Errorf("no credentials found")
-// }
-
-// func getCredentialById(idStr string) (*store.SshSession, error) {
-// 	id, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	cfg, err := config.Load()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	if !store.Exists(cfg.StorePath) {
-// 		return nil, err
-// 	}
-
-// 	db, err := store.Load(cfg.StorePath)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	credential, err := db.GetSshSession(id)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return credential, nil
-// }
-
-// func getCredentialBySshConnection(connection string, password string) (*store.SshSession, error) {
-// 	split1 := strings.Split(connection, "@")
-// 	if len(split1) != 2 || split1[0] == "" || split1[1] == "" {
-// 		return nil, fmt.Errorf("invalid connection string format. use 'user@host:port'")
-// 	}
-
-// 	user := split1[0]
-// 	host := ""
-// 	port := 22
-
-// 	split2 := strings.Split(split1[1], ":")
-
-// 	if len(split2) == 2 {
-
-// 		p, err := strconv.Atoi(split2[1])
-// 		if err != nil {
-// 			return nil, fmt.Errorf("invalid port number: %s", split2[1])
-// 		}
-
-// 		port = p
-// 	}
-
-// 	host = split2[0]
-
-// 	credential := store.SshSession{
-// 		Session: store.Session{
-// 			Name: "",
-// 		},
-// 		Host:     host,
-// 		Port:     port,
-// 		User:     user,
-// 		Password: password,
-// 	}
-
-// 	return &credential, nil
-// }

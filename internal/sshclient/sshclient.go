@@ -10,7 +10,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// ConnectAndRun initializes an SSH connection, starts an interactive shell, and manages the session lifecycle.
 func ConnectAndRun(credential store.SshSession) error {
 	client, err := ConnectSSH(credential)
 	if err != nil {
@@ -47,7 +46,6 @@ func ConnectAndRun(credential store.SshSession) error {
 	return session.Wait()
 }
 
-// connectSSH creates and returns an SSH client using the provided credentials.
 func ConnectSSH(credential store.SshSession) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		User: credential.User,
@@ -65,7 +63,6 @@ func ConnectSSH(credential store.SshSession) (*ssh.Client, error) {
 	return client, nil
 }
 
-// setupTerminal puts the terminal into raw mode and returns the old state for restoration.
 func setupTerminal() (*term.State, error) {
 	oldState, err := term.MakeRaw(os.Stdin.Fd())
 	if err != nil {
@@ -74,7 +71,6 @@ func setupTerminal() (*term.State, error) {
 	return oldState, nil
 }
 
-// handleInterrupt listens for Ctrl+C and restores the terminal before exiting.
 func handleInterrupt(oldState *term.State) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -86,7 +82,6 @@ func handleInterrupt(oldState *term.State) {
 	}()
 }
 
-// setupSessionIO attaches the standard IO streams to the SSH session.
 func setupSessionIO(session *ssh.Session) error {
 	session.Stdin = os.Stdin
 	session.Stdout = os.Stdout
@@ -94,7 +89,6 @@ func setupSessionIO(session *ssh.Session) error {
 	return nil
 }
 
-// requestTTY requests an interactive terminal for the SSH session.
 func RequestTTY(session *ssh.Session) error {
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          1,
@@ -102,19 +96,8 @@ func RequestTTY(session *ssh.Session) error {
 		ssh.TTY_OP_OSPEED: 14400,
 	}
 
-	// width, height := GetSize()
-
 	if err := session.RequestPty("xterm-256color", 40, 120, modes); err != nil {
 		return fmt.Errorf("failed to request TTY: %v", err)
 	}
 	return nil
-}
-
-func GetSize() (width int, height int) {
-	fd := uintptr(os.Stdin.Fd())
-	width, height, err := term.GetSize(fd)
-	if err != nil {
-		return 80, 24
-	}
-	return width, height
 }
