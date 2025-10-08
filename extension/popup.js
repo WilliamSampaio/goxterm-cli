@@ -11,6 +11,7 @@ const btnConnectSSH = document.getElementById('btnConnectSSH');
 const btnSaveConnection = document.getElementById('btnSaveConnection');
 const btnDeleteConnection = document.getElementById('btnDeleteConnection');
 
+const terminalsMessage = document.getElementById('terminalsMessage');
 const formSelectShell = document.getElementById('formSelectShell');
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -46,40 +47,45 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    fetch(`${config.backend_url}/api/info`)
-        .then(async response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}.`);
-            }
-            const { shells } = await response.json();
+    const backendGetInfo = async () => {
+        if (formSelectShell.children.length > 1) {
+            formSelectShell.children.slice(1).forEach(c => c.remove());
+        };
+        return fetch(`${config.backend_url}/api/info`)
+            .then(async response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}.`);
+                }
+                const { shells } = await response.json();
 
-            shells.forEach(s => {
-                if (!s.default) return;
+                shells.forEach(s => {
+                    if (!s.default) return;
 
-                const button = document.createElement('button');
-                button.style.marginBottom = '2px';
-                button.name = 'path';
-                button.value = s.path;
-                button.textContent = s.bin + ' (default)';
+                    const button = document.createElement('button');
+                    button.style.marginBottom = '2px';
+                    button.name = 'path';
+                    button.value = s.path;
+                    button.textContent = s.bin + ' (default)';
 
-                formSelectShell.append(button);
+                    formSelectShell.append(button);
+                });
+
+                shells.forEach(s => {
+                    if (s.default) return;
+
+                    const button = document.createElement('button');
+                    button.style.marginBottom = '2px';
+                    button.name = 'path';
+                    button.value = s.path;
+                    button.textContent = s.bin;
+
+                    formSelectShell.append(button);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching API data:', error);
             });
-
-            shells.forEach(s => {
-                if (s.default) return;
-
-                const button = document.createElement('button');
-                button.style.marginBottom = '2px';
-                button.name = 'path';
-                button.value = s.path;
-                button.textContent = s.bin;
-
-                formSelectShell.append(button);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching API data:', error);
-        });
+    }
 
     const setBackendStatus = (online = true) => {
         const inputs = document.querySelectorAll('input');
@@ -89,11 +95,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             backendStatus.style.color = "green";
             inputs.forEach(input => input.disabled = false);
             buttons.forEach(input => input.disabled = false);
+            terminalsMessage.textContent = '';
         } else {
             backendStatus.textContent = "Offline";
             backendStatus.style.color = "red";
             inputs.forEach(input => input.disabled = true);
             buttons.forEach(input => input.disabled = true);
+            terminalsMessage.textContent = 'No terminals available. Backend is offline.';
+            terminalsMessage.style.color = "red";
         }
     }
 
@@ -109,6 +118,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 if (alive === true) {
                     setBackendStatus(true);
+                    if (formSelectShell.children.length === 1) {
+                        backendGetInfo();
+                    }
                 } else {
                     setBackendStatus(false);
                 }
@@ -121,6 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     backendIsOnline();
     setInterval(backendIsOnline, 2000);
+    setInterval(backendGetInfo, 30 * 1000);
 
     formSelectShell.action = (config && config.backend_url) ? `${config.backend_url}/web` : '';
 

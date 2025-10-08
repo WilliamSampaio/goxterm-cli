@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const content = document.createElement("div");
             content.style.marginRight = "10px";
+            content.style.marginBottom = "0";
 
             const alias = document.createElement("strong");
             alias.textContent = conn.alias;
@@ -56,6 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const btnDelete = document.createElement("button");
             btnDelete.textContent = "Delete";
+            btnDelete.classList.add("small");
             btnDelete.style.marginLeft = "auto";
 
             btnDelete.addEventListener("click", async () => {

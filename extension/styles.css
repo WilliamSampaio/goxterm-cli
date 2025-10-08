@@ -1,0 +1,42 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    min-width: 300px;
+    padding: 10px;
+}
+
+hr {
+    margin: 10px 0;
+}
+
+input,
+select {
+    display: block;
+    width: -webkit-fill-available;
+}
+
+div {
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+button.small {
+    padding: 2px 5px;
+}
+
+p {
+    margin-bottom: 5px;
+}

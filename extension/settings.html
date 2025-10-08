@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Goxterm Extension</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -14,8 +15,9 @@
     </div>
     <hr>
     <div>
-        <b style="text-align: center;">Settings</b>
-        <br>
+        <div>
+            <b style="text-align: center;">Settings</b>
+        </div>
         <div>
             <label for="inputBackend">GoXterm Backend URL:</label>
             <input id="inputBackend" name="backend" type="text" placeholder="http://localhost:8080">
@@ -33,10 +35,18 @@
             <label for="inputDefaultPassword">SSH Default Password:</label>
             <input id="inputDefaultPassword" name="password" type="password">
         </div>
-        <br>
-        <div style="display: flex;">
+        <div style="display: flex">
             <button style="margin-left: auto;" id="btnSaveSettings">Save</button>
         </div>
+    </div>
+    <hr>
+    <div>
+        <b>Backup/Restore</b>
+    </div>
+    <div></div>
+    <hr>
+    <div>
+        <a href="about.html" style="margin-left: auto;"><b style="text-align: center;display: block;">About</b></a>
     </div>
 
     <script src="polyfill.js"></script>
