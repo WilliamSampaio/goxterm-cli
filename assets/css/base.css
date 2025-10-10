@@ -9,6 +9,11 @@ html {
     display: none;
 }
 
+.xterm .xterm-screen {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #terminal-wrapper {
     box-sizing: border-box;
 }
