@@ -6,6 +6,9 @@
     width: 320px;
     height: auto;
     padding: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: medium;
+    color: black;
     background-color: white;
     border: 1px solid black;
     border-radius: 7px;
