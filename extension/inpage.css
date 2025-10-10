@@ -1,0 +1,27 @@
+.goxterm_in_page_script_dialog {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    height: auto;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 7px;
+    z-index: 999999;
+}
+
+.goxterm_in_page_script_list_item {
+    width: -webkit-fill-available;
+    padding: 3px;
+}
+
+.goxterm_in_page_script_list_item:hover {
+    cursor: pointer;
+    background-color: darkgray;
+}
+
+.goxterm_in_page_script_input input {
+    width: -webkit-fill-available;
+}
