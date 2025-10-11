@@ -9,29 +9,42 @@
 
     const inPage = document.createElement("div");
     inPage.id = IN_PAGE_ID;
-    inPage.style.display = "none"
-    inPage.classList.add('goxterm_in_page_script_dialog');
+    inPage.style.display = "none";
+
+    const overlay = document.createElement("div");
+    overlay.classList.add("goxterm_in_page_script_overlay");
+
+    overlay.addEventListener("click", () => {
+        inPage.style.display = "none";
+    });
+
+    inPage.appendChild(overlay);
+
+    const dialog = document.createElement("div");
+    dialog.classList.add("goxterm_in_page_script_basic", "goxterm_in_page_script_dialog");
 
     const content = document.createElement("div");
+    content.style.display = "flex";
+    content.style.flexDirection = "column";
 
-    const label = document.createElement("label");
+    const label = document.createElement("b");
     label.textContent = "GoXterm | Search SSH:";
 
     const inputSearch = document.createElement("input");
     inputSearch.id = IN_PAGE_ID + "inputSearch";
     inputSearch.type = "text";
-    inputSearch.classList.add("goxterm_in_page_script_input");
+    inputSearch.classList.add("goxterm_in_page_script_basic", "goxterm_in_page_script_input");
+    inputSearch.autocomplete = "off";
 
     content.appendChild(label);
     content.appendChild(inputSearch);
-
-    inPage.appendChild(content);
+    dialog.appendChild(content);
 
     const listConnections = document.createElement("div");
     listConnections.id = IN_PAGE_ID + "listConnections";
+    dialog.appendChild(listConnections);
 
-    inPage.appendChild(listConnections);
-
+    inPage.appendChild(dialog);
     document.body.appendChild(inPage);
 
     document.addEventListener("keydown", (e) => {
