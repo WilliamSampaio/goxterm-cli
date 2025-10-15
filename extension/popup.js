@@ -7,6 +7,9 @@ const inputPassword = document.getElementById('inputPassword');
 // const inputPrivateKey = document.getElementById('inputPrivateKey');
 // const inputPassphrase = document.getElementById('inputPassphrase');
 
+const btnShowPassword = document.getElementById('btnShowPassword');
+const btnCopyPassword = document.getElementById('btnCopyPassword');
+
 const btnConnectSSH = document.getElementById('btnConnectSSH');
 const btnSaveConnection = document.getElementById('btnSaveConnection');
 const btnDeleteConnection = document.getElementById('btnDeleteConnection');
@@ -174,6 +177,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         window.open(url.toString(), '_blank');
+    });
+
+    btnShowPassword.addEventListener("click", () => {
+        if (inputPassword.type === "password") {
+            inputPassword.type = "text";
+            btnShowPassword.textContent = "Hide";
+        } else {
+            inputPassword.type = "password";
+            btnShowPassword.textContent = "Show";
+        }
+    });
+
+    btnCopyPassword.addEventListener("click", () => {
+        if (!inputPassword.value) return;
+
+        navigator.clipboard.writeText(inputPassword.value).then(() => {
+            notify("GoXterm Extension", "Password copied to clipboard.");
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+            notify("Error! | GoXterm Extension", "Failed to copy password.");
+        });
     });
 
     btnSaveConnection.addEventListener("click", async () => {
