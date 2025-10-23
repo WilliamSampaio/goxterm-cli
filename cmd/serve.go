@@ -6,8 +6,6 @@ package cmd
 import (
 	"fmt"
 	"goxterm-cli/internal/api"
-	// "goxterm-cli/internal/config"
-	"goxterm-cli/internal/web"
 	"goxterm-cli/internal/websocket"
 	"log"
 	"net/http"
@@ -38,18 +36,13 @@ func init() {
 func serve(port int) {
 	fmt.Println("Starting GoXterm web server...")
 
-	fs := http.FileServer(http.Dir("./assets/"))
-	http.Handle("/assets/", http.StripPrefix("/assets/", fs))
-
 	http.HandleFunc("/api/ping", api.Ping)
 	http.HandleFunc("/api/info", api.GetInfo)
-
-	http.HandleFunc("/web", web.Index)
 
 	http.HandleFunc("/ws/ssh", websocket.SshWebSocketHandler)
 	http.HandleFunc("/ws/shell", websocket.ShellWebSocketHandler)
 
-	http.Handle("/", http.FileServer(http.Dir("/usr/local/share/goxterm")))
+	http.Handle("/", http.FileServer(http.Dir("/usr/local/share/goxterm/webapp")))
 
 	log.Printf("Server started at http://localhost:%d\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))

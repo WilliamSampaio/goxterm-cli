@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setInterval(backendIsOnline, 2000);
     setInterval(backendGetInfo, 30 * 1000);
 
-    formSelectShell.action = (config && config.backend_url) ? `${config.backend_url}/web` : '';
+    formSelectShell.action = (config && config.backend_url) ? `${config.backend_url}` : '';
 
     btnConnectSSH.addEventListener("click", () => {
         const host = inputHost.value.trim();
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        const url = new URL(`${config.backend_url}/web`);
+        const url = new URL(`${config.backend_url}`);
         url.searchParams.append("ssh", true);
         url.searchParams.append("host", host);
         url.searchParams.append("port", port);
