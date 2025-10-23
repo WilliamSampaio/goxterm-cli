@@ -137,6 +137,8 @@ func ShellWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		ws.Close()
 	}()
 
+	ptmx.Write([]byte("cd $HOME"))
+
 	for {
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
