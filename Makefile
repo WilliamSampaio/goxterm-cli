@@ -41,8 +41,7 @@ install: build
 	@sudo install -Dm 0755 $(DIST_DIR)/$(APP_NAME) $(BIN_INSTALL_DIR)/$(APP_NAME)
 	@echo "📦 Installing $(APP_NAME) in $(FILES_INSTALL_DIR)..."
 	@sudo mkdir -p $(FILES_INSTALL_DIR)/$(APP_NAME)
-	@sudo cp -r assets $(FILES_INSTALL_DIR)/$(APP_NAME)/
-	@sudo cp -r pages $(FILES_INSTALL_DIR)/$(APP_NAME)/
+	@sudo cp -r webapp $(FILES_INSTALL_DIR)/$(APP_NAME)/
 	@echo "✅ Installation complete. Now you can use the command '$(APP_NAME)' directly."
 
 uninstall:

@@ -10,7 +10,6 @@
     <script src="/assets/js/xterm-addon-fit.min.js"></script>
     <script src="/assets/js/xterm-addon-web-links.min.js"></script>
     <script src="/assets/js/xterm-addon-attach.min.js"></script>
-    <script src="/assets/js/jquery-3.7.1.min.js"></script>
     <link href="/assets/css/xterm.css" rel="stylesheet">
     <link href="/assets/css/base.css" rel="stylesheet">
     <link href="/assets/css/crt_theme.css" rel="stylesheet">
@@ -201,7 +200,6 @@
             selectTheme.value = localStorage.getItem("goxteerm-theme") || 'default';
             setTheme(selectTheme.value);
 
-            $("#terminal-wrapper").fadeIn(3);
             term.focus();
         });
     </script>

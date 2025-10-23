@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         filteredConnections.forEach(conn => {
-            const url = new URL(`${config.backend_url}/web`);
+            const url = new URL(`${config.backend_url}`);
             url.searchParams.append("ssh", true);
             url.searchParams.append("host", conn.host);
             url.searchParams.append("port", conn.port);
